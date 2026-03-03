@@ -70,7 +70,25 @@ export interface FigmaComment {
   reactions?: Array<{ emoji: string; user: FigmaUser }>;
 }
 
+export interface FigmaFileMeta {
+  name: string;
+  version: string;
+  lastModified: string;
+  editorType?: string;
+}
+
 // ---- API methods ----
+
+/** GET /v1/me — current authenticated user */
+export async function getMe(): Promise<FigmaUser> {
+  return figmaFetch<FigmaUser>("/me");
+}
+
+/** GET /v1/files/{file_key}/meta — lightweight file metadata */
+export async function getFileMeta(fileKey: string): Promise<FigmaFileMeta> {
+  const data = await figmaFetch<{ file: FigmaFileMeta }>(`/files/${fileKey}/meta`);
+  return data.file;
+}
 
 /** GET /v1/teams/{team_id}/projects */
 export async function getTeamProjects(teamId: string): Promise<FigmaProject[]> {
@@ -127,4 +145,50 @@ export async function getFileComments(
 
   const data = await figmaFetch<{ comments: FigmaComment[] }>(`/files/${fileKey}/comments`, params);
   return data.comments;
+}
+
+// ---- URL parsing utility ----
+
+export interface ParsedFigmaUrl {
+  fileKey: string;
+  fileName?: string;
+  nodeId?: string;
+}
+
+/**
+ * Extracts file key (and optionally node-id) from a Figma URL.
+ * Supports formats like:
+ *   https://www.figma.com/file/ABC123/My-File
+ *   https://www.figma.com/design/ABC123/My-File?node-id=1-23
+ *   https://figma.com/file/ABC123
+ *   https://www.figma.com/proto/ABC123/...
+ *   https://www.figma.com/board/ABC123/...
+ */
+export function parseFigmaUrl(url: string): ParsedFigmaUrl | null {
+  try {
+    const parsed = new URL(url);
+    if (!parsed.hostname.endsWith("figma.com")) return null;
+
+    // Path pattern: /(file|design|proto|board)/{fileKey}/{optional-name}
+    const match = parsed.pathname.match(/^\/(file|design|proto|board)\/([a-zA-Z0-9]+)/);
+    if (!match) return null;
+
+    const result: ParsedFigmaUrl = { fileKey: match[2] };
+
+    // Extract human-readable name from path
+    const namePart = parsed.pathname.split("/")[3];
+    if (namePart) {
+      result.fileName = decodeURIComponent(namePart).replace(/-/g, " ");
+    }
+
+    // Extract node-id from query params
+    const nodeId = parsed.searchParams.get("node-id");
+    if (nodeId) {
+      result.nodeId = nodeId;
+    }
+
+    return result;
+  } catch {
+    return null;
+  }
 }

@@ -1,0 +1,247 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --border: #30363d;
+  --text: #c9d1d9;
+  --text-muted: #8b949e;
+  --accent: #58a6ff;
+  --green: #3fb950;
+  --yellow: #d29922;
+  --red: #f85149;
+  --purple: #bc8cff;
+  --orange: #f0883e;
+  --font-mono: "SF Mono", "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+}
+
+html,
+body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+header h1 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+header .subtitle {
+  font-weight: 400;
+  color: var(--text-muted);
+  margin-left: 6px;
+}
+
+.status {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status.connected {
+  background: rgba(63, 185, 80, 0.15);
+  color: var(--green);
+}
+
+.status.disconnected {
+  background: rgba(248, 81, 73, 0.15);
+  color: var(--red);
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.filters {
+  display: flex;
+  gap: 4px;
+}
+
+.filter {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 4px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.15s;
+}
+
+.filter:hover {
+  border-color: var(--text-muted);
+  color: var(--text);
+}
+
+.filter.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.clear-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 4px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.clear-btn:hover {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+/* Log container */
+main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+/* Log entry */
+.log-entry {
+  display: grid;
+  grid-template-columns: 90px 80px 110px 1fr;
+  gap: 12px;
+  padding: 6px 20px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  border-bottom: 1px solid rgba(48, 54, 61, 0.4);
+  transition: background 0.15s;
+  animation: slideIn 0.2s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.log-entry:hover {
+  background: rgba(88, 166, 255, 0.04);
+}
+
+.log-entry.hidden {
+  display: none;
+}
+
+.log-time {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.log-level {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.log-level.info {
+  color: var(--accent);
+}
+.log-level.tool {
+  color: var(--purple);
+}
+.log-level.request {
+  color: var(--yellow);
+}
+.log-level.response {
+  color: var(--green);
+}
+.log-level.error {
+  color: var(--red);
+}
+.log-level.lifecycle {
+  color: var(--orange);
+}
+
+.log-category {
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.log-summary {
+  color: var(--text);
+  word-break: break-word;
+}
+
+/* Detail expandable */
+.log-detail {
+  grid-column: 1 / -1;
+  background: rgba(22, 27, 34, 0.8);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin: 4px 20px 4px 0;
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: pre-wrap;
+  display: none;
+}
+
+.log-entry.expanded .log-detail {
+  display: block;
+}
+
+/* Empty state */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-muted);
+  font-size: 15px;
+  gap: 8px;
+}
+
+.empty-state .icon {
+  font-size: 40px;
+  opacity: 0.4;
+}

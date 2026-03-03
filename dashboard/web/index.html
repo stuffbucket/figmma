@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>figmma — MCP Dashboard</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>figmma <span class="subtitle">MCP Dashboard</span></h1>
+      <div id="status" class="status disconnected">disconnected</div>
+    </header>
+
+    <div class="controls">
+      <div class="filters">
+        <button class="filter active" data-level="all">All</button>
+        <button class="filter" data-level="lifecycle">Lifecycle</button>
+        <button class="filter" data-level="tool">Tools</button>
+        <button class="filter" data-level="request">Requests</button>
+        <button class="filter" data-level="response">Responses</button>
+        <button class="filter" data-level="error">Errors</button>
+      </div>
+      <button id="clear-btn" class="clear-btn">Clear</button>
+    </div>
+
+    <main id="log-container"></main>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

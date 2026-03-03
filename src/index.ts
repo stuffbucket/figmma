@@ -7,6 +7,8 @@ import { z } from "zod";
 import { observer } from "./observer.js";
 import {
   getMe,
+  getCachedUser,
+  initializeAuth,
   getTeamProjects,
   getProjectFiles,
   getFileMeta,
@@ -25,10 +27,10 @@ const server = new McpServer({
 // ---------------------------------------------------------------------------
 server.tool(
   "get_current_user",
-  "Verify your Figma API connection and see who you're authenticated as. Use this first to confirm the token is working.",
+  "See who you're authenticated as in Figma. The user profile is fetched automatically at startup, so this is a quick cached lookup.",
   {},
   async () => {
-    observer.log("tool", "get_current_user", "Checking current Figma user");
+    observer.log("tool", "get_current_user", "Returning current Figma user");
     try {
       const user = await getMe();
       const msg = [
@@ -295,6 +297,13 @@ server.tool(
 async function main(): Promise<void> {
   await observer.start();
   observer.log("lifecycle", "server", "MCP server starting up");
+
+  // Eagerly fetch & cache the authenticated user profile
+  await initializeAuth();
+  const user = getCachedUser();
+  if (user) {
+    observer.log("lifecycle", "server", `Ready as ${user.handle} (${user.email ?? user.id})`);
+  }
 
   const transport = new StdioServerTransport();
 

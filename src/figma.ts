@@ -79,9 +79,34 @@ export interface FigmaFileMeta {
 
 // ---- API methods ----
 
-/** GET /v1/me — current authenticated user */
+// Cached user profile — fetched once on first access
+let cachedUser: FigmaUser | null = null;
+
+/** GET /v1/me — current authenticated user (cached after first call) */
 export async function getMe(): Promise<FigmaUser> {
-  return figmaFetch<FigmaUser>("/me");
+  if (cachedUser) return cachedUser;
+  cachedUser = await figmaFetch<FigmaUser>("/me");
+  observer.log("lifecycle", "figma-auth", `Authenticated as ${cachedUser.handle} (${cachedUser.email ?? cachedUser.id})`);
+  return cachedUser;
+}
+
+/** Returns cached user if already fetched, null otherwise */
+export function getCachedUser(): FigmaUser | null {
+  return cachedUser;
+}
+
+/**
+ * Eagerly fetch and cache the user profile.
+ * Called at MCP startup — if it fails, we log but don't crash
+ * (tools will surface the auth error when actually used).
+ */
+export async function initializeAuth(): Promise<void> {
+  try {
+    await getMe();
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    observer.log("error", "figma-auth", `Could not authenticate on startup: ${msg}`);
+  }
 }
 
 /** GET /v1/files/{file_key}/meta — lightweight file metadata */

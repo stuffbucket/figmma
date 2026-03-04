@@ -9,6 +9,10 @@ interface LogMessage {
 const logContainer = document.getElementById("log-container")!;
 const statusEl = document.getElementById("status")!;
 const clearBtn = document.getElementById("clear-btn")!;
+const userProfileEl = document.getElementById("user-profile")!;
+const userAvatarEl = document.getElementById("user-avatar") as HTMLImageElement;
+const userNameEl = document.getElementById("user-name")!;
+const userEmailEl = document.getElementById("user-email")!;
 
 let activeFilter = "all";
 let autoScroll = true;
@@ -57,6 +61,36 @@ function showEmptyState(): void {
 
 function removeEmptyState(): void {
   logContainer.querySelector(".empty-state")?.remove();
+}
+
+// ---- User profile display ----
+interface FigmaUserProfile {
+  id: string;
+  handle: string;
+  email?: string;
+  img_url?: string;
+}
+
+function showUserProfile(user: FigmaUserProfile): void {
+  userNameEl.textContent = user.handle;
+  userEmailEl.textContent = user.email ?? `ID: ${user.id}`;
+  if (user.img_url) {
+    userAvatarEl.src = user.img_url;
+    userAvatarEl.alt = user.handle;
+  } else {
+    // Generate initials fallback
+    userAvatarEl.style.display = "none";
+  }
+  userProfileEl.classList.remove("hidden");
+}
+
+function isUserProfileMessage(msg: LogMessage): msg is LogMessage & { detail: FigmaUserProfile } {
+  return (
+    msg.category === "user-profile" &&
+    msg.detail != null &&
+    typeof msg.detail === "object" &&
+    "handle" in (msg.detail as Record<string, unknown>)
+  );
 }
 
 // ---- Render a log entry ----
@@ -128,6 +162,9 @@ function connect(): void {
   ws.addEventListener("message", (event) => {
     try {
       const msg: LogMessage = JSON.parse(event.data as string);
+      if (isUserProfileMessage(msg)) {
+        showUserProfile(msg.detail);
+      }
       renderEntry(msg);
     } catch {
       // Ignore malformed messages

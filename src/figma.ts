@@ -86,7 +86,7 @@ let cachedUser: FigmaUser | null = null;
 export async function getMe(): Promise<FigmaUser> {
   if (cachedUser) return cachedUser;
   cachedUser = await figmaFetch<FigmaUser>("/me");
-  observer.log("lifecycle", "figma-auth", `Authenticated as ${cachedUser.handle} (${cachedUser.email ?? cachedUser.id})`);
+  observer.log("lifecycle", "user-profile", `Authenticated as ${cachedUser.handle}`, cachedUser);
   return cachedUser;
 }
 

@@ -8,8 +8,19 @@
   </head>
   <body>
     <header>
-      <h1>figmma <span class="subtitle">MCP Dashboard</span></h1>
-      <div id="status" class="status disconnected">disconnected</div>
+      <div class="header-left">
+        <h1>figmma <span class="subtitle">MCP Dashboard</span></h1>
+      </div>
+      <div class="header-right">
+        <div id="user-profile" class="user-profile hidden">
+          <img id="user-avatar" class="user-avatar" alt="" />
+          <div class="user-info">
+            <span id="user-name" class="user-name"></span>
+            <span id="user-email" class="user-email"></span>
+          </div>
+        </div>
+        <div id="status" class="status disconnected">disconnected</div>
+      </div>
     </header>
 
     <div class="controls">

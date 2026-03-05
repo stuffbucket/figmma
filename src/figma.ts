@@ -1,12 +1,13 @@
 import { observer } from "./observer.js";
+import { getToken as getConfigToken } from "./config.js";
 
 const FIGMA_API_BASE = "https://api.figma.com/v1";
 
 function getToken(): string {
-  const token = process.env.FIGMA_API_TOKEN ?? process.env.FIGMA_TOKEN;
+  const token = getConfigToken();
   if (!token) {
     throw new Error(
-      "Missing Figma API token. Set FIGMA_API_TOKEN or FIGMA_TOKEN environment variable.",
+      "Missing Figma API token. Set FIGMA_API_TOKEN in your MCP client env, or run the dashboard setup.",
     );
   }
   return token;

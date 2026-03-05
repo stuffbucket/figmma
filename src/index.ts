@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
-import "dotenv/config";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { observer } from "./observer.js";
+import { getTeamId } from "./config.js";
 import {
   getMe,
   getCachedUser,
@@ -16,6 +16,16 @@ import {
   getFileComments,
   parseFigmaUrl,
 } from "./figma.js";
+
+function resolveTeamId(explicit?: string): string {
+  const id = explicit ?? getTeamId();
+  if (!id) {
+    throw new Error(
+      "No team ID provided. Either pass team_id, set FIGMA_TEAM_ID in your MCP client env, or run the dashboard setup.",
+    );
+  }
+  return id;
+}
 
 const server = new McpServer({
   name: "figmma",
@@ -84,11 +94,12 @@ server.tool(
 // ---------------------------------------------------------------------------
 server.tool(
   "list_team_projects",
-  "List all projects in a Figma team. You can find your team ID in the Figma URL when viewing a team page (e.g. figma.com/files/team/TEAM_ID/...).",
+  "List all projects in a Figma team. If no team_id is provided, uses the configured default.",
   {
-    team_id: z.string().describe("The Figma team ID"),
+    team_id: z.string().optional().describe("The Figma team ID (optional if configured via setup)"),
   },
-  async ({ team_id }) => {
+  async ({ team_id: explicitTeamId }) => {
+    const team_id = resolveTeamId(explicitTeamId);
     observer.log("tool", "list_team_projects", `Listing projects for team ${team_id}`);
     try {
       const projects = await getTeamProjects(team_id);
@@ -180,14 +191,15 @@ server.tool(
 // ---------------------------------------------------------------------------
 server.tool(
   "search_projects",
-  "Search for Figma files by name across all projects in a team. If you don't have the team ID, ask the user — it's in the Figma URL when viewing a team page (figma.com/files/team/TEAM_ID/...). Use list_team_projects and list_project_files for browsing instead.",
+  "Search for Figma files by name across all projects in a team. If no team_id is provided, uses the configured default.",
   {
-    team_id: z.string().describe("The Figma team ID to search within"),
+    team_id: z.string().optional().describe("The Figma team ID to search within (optional if configured via setup)"),
     query: z
       .string()
       .describe("Search query to match against file names (case-insensitive substring match)"),
   },
-  async ({ team_id, query }) => {
+  async ({ team_id: explicitTeamId, query }) => {
+    const team_id = resolveTeamId(explicitTeamId);
     observer.log("tool", "search_projects", `Searching team ${team_id} for "${query}"`);
     try {
       const results = await searchProjectFiles(team_id, query);

@@ -7,6 +7,59 @@
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
+    <!-- Setup overlay — shown when PAT or team ID is missing -->
+    <div id="setup-overlay" class="setup-overlay hidden">
+      <div class="setup-container">
+        <h2 class="setup-title">figmma Setup</h2>
+        <p class="setup-subtitle">Configure your Figma connection to get started.</p>
+
+        <!-- Card 1: API Token -->
+        <div class="setup-card" id="setup-token-card">
+          <div class="setup-card-header">
+            <span class="setup-step">1</span>
+            <h3>Personal Access Token</h3>
+            <span id="token-status-badge" class="badge badge-pending">required</span>
+          </div>
+          <ol class="setup-steps">
+            <li>Open <a href="https://www.figma.com/developers/api#access-tokens" target="_blank" rel="noopener">Figma → Settings → Personal Access Tokens</a></li>
+            <li>Click <strong>"Generate new token"</strong>, give it a description, and copy it</li>
+            <li>Paste the token below:</li>
+          </ol>
+          <div class="setup-input-row">
+            <input id="token-input" type="password" class="setup-input" placeholder="figd_..." autocomplete="off" />
+            <button id="token-toggle" class="setup-btn-icon" title="Show/hide token">👁</button>
+            <button id="token-submit" class="setup-btn">Validate &amp; Save</button>
+          </div>
+          <div id="token-feedback" class="setup-feedback"></div>
+        </div>
+
+        <!-- Card 2: Team Discovery -->
+        <div class="setup-card" id="setup-team-card">
+          <div class="setup-card-header">
+            <span class="setup-step">2</span>
+            <h3>Team ID</h3>
+            <span id="team-status-badge" class="badge badge-pending">required</span>
+          </div>
+          <ol class="setup-steps">
+            <li><a href="https://www.figma.com/files/" target="_blank" rel="noopener">Open Figma in your browser</a> (log in if needed)</li>
+            <li>In the left sidebar, click on your <strong>team name</strong></li>
+            <li>Your browser's address bar will show a URL like:<br />
+              <code class="setup-url-example">figma.com/files/team/<strong>123456789</strong>/Your-Team</code>
+            </li>
+            <li>Copy that URL (or just the number) and paste it below:</li>
+          </ol>
+          <div class="setup-input-row">
+            <input id="team-input" class="setup-input" placeholder="https://www.figma.com/files/team/... or just the ID" autocomplete="off" />
+            <button id="team-submit" class="setup-btn">Validate &amp; Save</button>
+          </div>
+          <div id="team-feedback" class="setup-feedback"></div>
+        </div>
+
+        <button id="setup-done" class="setup-done-btn hidden">Open Dashboard →</button>
+        <div id="setup-config-path" class="setup-config-path"></div>
+      </div>
+    </div>
+
     <header>
       <div class="header-left">
         <h1>figmma <span class="subtitle">MCP Dashboard</span></h1>

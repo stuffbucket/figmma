@@ -2,8 +2,9 @@
   "mcpServers": {
     "figmma": {
       "command": "npx",
-      "args": ["tsx", "src/index.ts"],
-      "cwd": "/Users/brian/github/stuffbucket/figmma"
+      "args": [
+        "figmma"
+      ]
     }
   }
 }

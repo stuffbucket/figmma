@@ -5,7 +5,14 @@ import { createServer } from "http";
 import { createConnection } from "net";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
-import type { IncomingMessage } from "http";
+import type { IncomingMessage, ServerResponse } from "http";
+import {
+  getToken as getConfigToken,
+  getTeamId as getConfigTeamId,
+  setToken as setConfigToken,
+  setTeamId as setConfigTeamId,
+  configPath,
+} from "../config.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -26,12 +33,189 @@ function addToHistory(raw: string): void {
 }
 
 // --------------------------------------------------------------------------
+// Config API helpers
+// --------------------------------------------------------------------------
+function readBody(req: IncomingMessage): Promise<string> {
+  return new Promise((resolve, reject) => {
+    let body = "";
+    req.on("data", (c: Buffer) => {
+      body += c.toString();
+      if (body.length > 8192) {
+        reject(new Error("Body too large"));
+        req.destroy();
+      }
+    });
+    req.on("end", () => resolve(body));
+    req.on("error", reject);
+  });
+}
+
+function json(res: ServerResponse, status: number, data: unknown): void {
+  const payload = JSON.stringify(data);
+  res.writeHead(status, {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+  });
+  res.end(payload);
+}
+
+async function validateFigmaToken(
+  token: string,
+): Promise<{ ok: true; user: { id: string; handle: string; email?: string } } | { ok: false; error: string }> {
+  try {
+    const res = await fetch("https://api.figma.com/v1/me", {
+      headers: { "X-Figma-Token": token },
+    });
+    if (!res.ok) {
+      return { ok: false, error: `Figma responded ${res.status} ${res.statusText}` };
+    }
+    const user = (await res.json()) as { id: string; handle: string; email?: string };
+    return { ok: true, user };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : String(err) };
+  }
+}
+
+async function validateTeamId(
+  token: string,
+  teamId: string,
+): Promise<{ ok: true; projects: Array<{ id: string; name: string }> } | { ok: false; error: string }> {
+  try {
+    const res = await fetch(`https://api.figma.com/v1/teams/${encodeURIComponent(teamId)}/projects`, {
+      headers: { "X-Figma-Token": token },
+    });
+    if (!res.ok) {
+      const body = await res.text();
+      return { ok: false, error: `Figma responded ${res.status}: ${body}` };
+    }
+    const data = (await res.json()) as { projects: Array<{ id: string; name: string }> };
+    return { ok: true, projects: data.projects };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : String(err) };
+  }
+}
+
+function extractTeamId(url: string): string | null {
+  // Patterns: figma.com/files/team/TEAM_ID/... or figma.com/files/TEAM_ID/...
+  const m = url.match(/figma\.com\/files\/(?:team\/)?(\d+)/);
+  return m ? m[1] : null;
+}
+
+// --------------------------------------------------------------------------
+// HTTP request handler
+// --------------------------------------------------------------------------
+async function handleHttpRequest(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  const url = req.url ?? "/";
+
+  // CORS preflight
+  if (req.method === "OPTIONS") {
+    res.writeHead(204, {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+    });
+    res.end();
+    return;
+  }
+
+  // GET /api/config/status — return what's configured
+  if (url === "/api/config/status" && req.method === "GET") {
+    const token = getConfigToken() ?? "";
+    const teamId = getConfigTeamId() ?? "";
+    json(res, 200, {
+      hasToken: token.length > 0,
+      tokenPreview: token.length > 8 ? `${token.slice(0, 8)}…` : "",
+      hasTeamId: teamId.length > 0,
+      teamId,
+      configPath,
+    });
+    return;
+  }
+
+  // POST /api/config/token — validate and save PAT
+  if (url === "/api/config/token" && req.method === "POST") {
+    const body = await readBody(req);
+    let parsed: { token?: string };
+    try {
+      parsed = JSON.parse(body);
+    } catch {
+      json(res, 400, { error: "Invalid JSON" });
+      return;
+    }
+    const token = parsed.token?.trim();
+    if (!token) {
+      json(res, 400, { error: "Missing 'token' field" });
+      return;
+    }
+
+    const result = await validateFigmaToken(token);
+    if (!result.ok) {
+      json(res, 400, { error: result.error });
+      return;
+    }
+
+    setConfigToken(token);
+    json(res, 200, { ok: true, user: result.user });
+    return;
+  }
+
+  // POST /api/config/team — validate and save team ID (from URL or raw ID)
+  if (url === "/api/config/team" && req.method === "POST") {
+    const body = await readBody(req);
+    let parsed: { team_id?: string; team_url?: string };
+    try {
+      parsed = JSON.parse(body);
+    } catch {
+      json(res, 400, { error: "Invalid JSON" });
+      return;
+    }
+
+    let teamId = parsed.team_id?.trim() ?? "";
+    if (!teamId && parsed.team_url) {
+      teamId = extractTeamId(parsed.team_url) ?? "";
+    }
+    if (!teamId) {
+      json(res, 400, { error: "Could not determine team ID. Provide team_id or a Figma team URL." });
+      return;
+    }
+
+    // Validate with API if we have a token
+    const token = getConfigToken() ?? "";
+    if (!token) {
+      setConfigTeamId(teamId);
+      json(res, 200, { ok: true, teamId, validated: false, message: "Saved but could not validate (no API token configured yet)." });
+      return;
+    }
+
+    const result = await validateTeamId(token, teamId);
+    if (!result.ok) {
+      json(res, 400, { error: result.error, teamId });
+      return;
+    }
+
+    setConfigTeamId(teamId);
+    json(res, 200, { ok: true, teamId, validated: true, projects: result.projects });
+    return;
+  }
+
+  // Default for non-API routes
+  res.writeHead(200, { "Content-Type": "text/plain" });
+  res.end("figmma dashboard ws endpoint");
+}
+
+// --------------------------------------------------------------------------
 // 1. WebSocket server on port 5183 — accepts connections from MCP observers
 //    AND from the web UI (differentiated by URL path).
 // --------------------------------------------------------------------------
-const httpServer = createServer((_req, res) => {
-  res.writeHead(200, { "Content-Type": "text/plain" });
-  res.end("figmma dashboard ws endpoint");
+const httpServer = createServer((req, res) => {
+  handleHttpRequest(req, res).catch((err) => {
+    console.error("[dashboard] HTTP error:", err);
+    if (!res.headersSent) {
+      json(res, 500, { error: "Internal server error" });
+    }
+  });
 });
 
 const wss = new WebSocketServer({ server: httpServer });

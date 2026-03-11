@@ -1,0 +1,343 @@
+---
+import "../styles/global.css";
+import "@fontsource-variable/inter";
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>figmma — MCP server for the Figma API</title>
+    <meta
+      name="description"
+      content="Give your AI agent full access to the Figma API. MCP server with real-time observability dashboard."
+    />
+    <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
+  </head>
+  <body>
+    <a
+      class="github-corner"
+      href="https://github.com/stuffbucket/figmma"
+      aria-label="View on GitHub"
+    >
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 16 16"
+        fill="currentColor"
+        ><path
+          d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
+        ></path></svg
+      >
+      GitHub
+    </a>
+
+    <div class="hero-gradient"><span class="blob"></span></div>
+
+    <main>
+      <!-- ── Hero ─────────────────────────────────────────── -->
+      <section class="hero">
+        <div class="hero-content">
+          <span class="hero-badge">MCP Server</span>
+          <h1>
+            Your agent<br /><span class="text-gradient">speaks Figma</span>
+          </h1>
+          <p class="hero-tagline">
+            Give your AI coding agent full access to the Figma API.<br />
+            List projects, search files, read metadata, pull comments — all through
+            <span class="text-gradient"><b>Model Context Protocol</b></span>.
+          </p>
+
+          <div class="install-command" id="install-box">
+            <span class="install-prompt">$</span>
+            <span class="install-text" id="install-text"
+              >npm install figmma</span
+            >
+            <button
+              class="install-copy"
+              onclick="copyInstall()"
+              aria-label="Copy install command"
+            >
+              <svg
+                id="copy-icon"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                ><rect x="9" y="9" width="13" height="13" rx="2"></rect><path
+                  d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"
+                ></path></svg
+              >
+              <svg
+                id="check-icon"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                style="display:none"
+                ><polyline points="20 6 9 17 4 12"></polyline></svg
+              >
+            </button>
+          </div>
+
+          <div class="hero-actions">
+            <a class="primary" href="#tools">See the tools</a>
+            <a class="secondary" href="#configure">Configure</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Feature cards ────────────────────────────────── -->
+      <section class="features">
+        <div class="feature">
+          <div class="feature-icon">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              ><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg
+            >
+          </div>
+          <h3>Zero config</h3>
+          <p>
+            Run <code>npm install figmma</code> — postinstall registers with
+            Claude Code, VS Code, and Codex automatically.
+          </p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              ><circle cx="11" cy="11" r="8"></circle><path
+                d="M21 21l-4.35-4.35"></path></svg
+            >
+          </div>
+          <h3>Search across teams</h3>
+          <p>
+            Search for files by name across every project in your team.
+            No more hunting through the Figma sidebar.
+          </p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              ><path
+                d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"
+              ></path></svg
+            >
+          </div>
+          <h3>Comments &amp; threads</h3>
+          <p>
+            Pull all comments from a file — threaded, with resolution status.
+            Your agent can read design feedback directly.
+          </p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              ><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"
+              ></path><path
+                d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"
+              ></path></svg
+            >
+          </div>
+          <h3>URL parsing</h3>
+          <p>
+            Paste a Figma link and the agent extracts the file key, name, and
+            node ID. No manual copying.
+          </p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              ><rect x="3" y="3" width="18" height="18" rx="2" ry="2"
+              ></rect><line x1="3" y1="9" x2="21" y2="9"></line><line
+                x1="9"
+                y1="21"
+                x2="9"
+                y2="9"></line></svg
+            >
+          </div>
+          <h3>Live dashboard</h3>
+          <p>
+            Real-time observability UI at <code>localhost:5183</code>. Watch
+            tool calls, API traffic, and auth status as they happen.
+          </p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              ><polyline points="16 18 22 12 16 6"></polyline><polyline
+                points="8 6 2 12 8 18"></polyline></svg
+            >
+          </div>
+          <h3>Works everywhere</h3>
+          <p>
+            Claude Code, VS Code / GitHub Copilot, Codex CLI — one install
+            registers with all MCP-compatible agents.
+          </p>
+        </div>
+      </section>
+
+      <!-- ── Tools table ──────────────────────────────────── -->
+      <section class="tools-section" id="tools">
+        <h2>
+          <span class="text-gradient">7 tools</span> for the Figma API
+        </h2>
+        <table class="tools-table">
+          <thead>
+            <tr>
+              <th>Tool</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>get_current_user</code></td>
+              <td>Show the authenticated Figma user (cached)</td>
+            </tr>
+            <tr>
+              <td><code>parse_figma_url</code></td>
+              <td>Extract file key and node ID from a Figma URL</td>
+            </tr>
+            <tr>
+              <td><code>list_team_projects</code></td>
+              <td>List all projects in a team</td>
+            </tr>
+            <tr>
+              <td><code>list_project_files</code></td>
+              <td>List all files in a project</td>
+            </tr>
+            <tr>
+              <td><code>get_file_info</code></td>
+              <td>Get file metadata (name, version, last modified)</td>
+            </tr>
+            <tr>
+              <td><code>search_projects</code></td>
+              <td>Search for files by name across all team projects</td>
+            </tr>
+            <tr>
+              <td><code>get_file_comments</code></td>
+              <td>Retrieve all comments and threads on a file</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ── Configure ────────────────────────────────────── -->
+      <section class="config-section" id="configure">
+        <h2>
+          Configure for <span class="text-gradient">your agent</span>
+        </h2>
+        <div class="config-grid">
+          <div class="config-card">
+            <h3>Claude Code</h3>
+            <pre><code>{JSON.stringify({ mcpServers: { figmma: { command: "npx", args: ["-y", "figmma"] } } }, null, 2)}</code></pre>
+          </div>
+          <div class="config-card">
+            <h3>VS Code / Copilot</h3>
+            <pre><code>{JSON.stringify({ servers: { figmma: { type: "stdio", command: "npx", args: ["-y", "figmma"] } } }, null, 2)}</code></pre>
+          </div>
+          <div class="config-card">
+            <h3>Codex CLI</h3>
+            <pre><code>{JSON.stringify({ mcpServers: { figmma: { command: "npx", args: ["-y", "figmma"] } } }, null, 2)}</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Closing CTA ──────────────────────────────────── -->
+      <section class="closing">
+        <h2>Get started in one command</h2>
+        <p>
+          Install figmma, enter your Figma API token in the setup wizard, and
+          your agent has everything it needs to work with your design files.
+        </p>
+        <div class="hero-actions">
+          <a
+            class="primary"
+            href="https://github.com/stuffbucket/figmma"
+          >
+            View on GitHub
+          </a>
+          <a
+            class="secondary"
+            href="https://github.com/stuffbucket/figmma/blob/main/README.md"
+          >
+            Read the docs
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <a href="https://github.com/stuffbucket/figmma">figmma</a> · MIT License
+    </footer>
+
+    <script is:inline>
+      function copyInstall() {
+        const text = document.getElementById("install-text").textContent;
+        navigator.clipboard.writeText(text);
+        document.getElementById("copy-icon").style.display = "none";
+        document.getElementById("check-icon").style.display = "block";
+        setTimeout(() => {
+          document.getElementById("copy-icon").style.display = "block";
+          document.getElementById("check-icon").style.display = "none";
+        }, 2000);
+      }
+    </script>
+  </body>
+</html>

@@ -8,6 +8,7 @@
   },
   "scripts": {
     "build": "tsc && vite build",
+    "build:site": "cd site && npm install && npm run build",
     "build:server": "tsc",
     "build:ui": "vite build",
     "mcp": "tsx src/index.ts",

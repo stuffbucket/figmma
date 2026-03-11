@@ -1,0 +1,14 @@
+{
+  "name": "@stuffbucket/figmma-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@fontsource-variable/inter": "^5.1.1",
+    "astro": "^5.9.3"
+  }
+}

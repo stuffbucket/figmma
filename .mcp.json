@@ -2,9 +2,7 @@
   "mcpServers": {
     "figmma": {
       "command": "npx",
-      "args": [
-        "figmma"
-      ]
+      "args": ["figmma"]
     }
   }
 }

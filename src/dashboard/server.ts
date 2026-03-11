@@ -33,12 +33,12 @@ let staticDir: string | null = null;
 
 const MIME_TYPES: Record<string, string> = {
   ".html": "text/html",
-  ".js":   "application/javascript",
-  ".css":  "text/css",
+  ".js": "application/javascript",
+  ".css": "text/css",
   ".json": "application/json",
-  ".svg":  "image/svg+xml",
-  ".png":  "image/png",
-  ".ico":  "image/x-icon",
+  ".svg": "image/svg+xml",
+  ".png": "image/png",
+  ".ico": "image/x-icon",
   ".woff": "font/woff",
   ".woff2": "font/woff2",
 };
@@ -124,7 +124,9 @@ function json(res: ServerResponse, status: number, data: unknown): void {
 
 async function validateFigmaToken(
   token: string,
-): Promise<{ ok: true; user: { id: string; handle: string; email?: string } } | { ok: false; error: string }> {
+): Promise<
+  { ok: true; user: { id: string; handle: string; email?: string } } | { ok: false; error: string }
+> {
   try {
     const res = await fetch("https://api.figma.com/v1/me", {
       headers: { "X-Figma-Token": token },
@@ -142,11 +144,16 @@ async function validateFigmaToken(
 async function validateTeamId(
   token: string,
   teamId: string,
-): Promise<{ ok: true; projects: Array<{ id: string; name: string }> } | { ok: false; error: string }> {
+): Promise<
+  { ok: true; projects: Array<{ id: string; name: string }> } | { ok: false; error: string }
+> {
   try {
-    const res = await fetch(`https://api.figma.com/v1/teams/${encodeURIComponent(teamId)}/projects`, {
-      headers: { "X-Figma-Token": token },
-    });
+    const res = await fetch(
+      `https://api.figma.com/v1/teams/${encodeURIComponent(teamId)}/projects`,
+      {
+        headers: { "X-Figma-Token": token },
+      },
+    );
     if (!res.ok) {
       const body = await res.text();
       return { ok: false, error: `Figma responded ${res.status}: ${body}` };
@@ -401,7 +408,10 @@ async function handleHttpRequest(req: IncomingMessage, res: ServerResponse): Pro
       orgId = parts.orgId;
     }
     if (!teamId) {
-      json(res, 400, { error: "Could not determine team ID. Paste a URL like figma.com/files/{orgId}/team/{teamId}, or just the numeric team ID." });
+      json(res, 400, {
+        error:
+          "Could not determine team ID. Paste a URL like figma.com/files/{orgId}/team/{teamId}, or just the numeric team ID.",
+      });
       return;
     }
 
@@ -414,7 +424,13 @@ async function handleHttpRequest(req: IncomingMessage, res: ServerResponse): Pro
     const token = getConfigToken() ?? "";
     if (!token) {
       setConfigTeamId(teamId);
-      json(res, 200, { ok: true, teamId, orgId, validated: false, message: "Saved but could not validate (no API token configured yet)." });
+      json(res, 200, {
+        ok: true,
+        teamId,
+        orgId,
+        validated: false,
+        message: "Saved but could not validate (no API token configured yet).",
+      });
       return;
     }
 
@@ -468,7 +484,10 @@ async function handleHttpRequest(req: IncomingMessage, res: ServerResponse): Pro
       json(res, 200, { result });
     } catch (err) {
       // Reset client on connection failure
-      if (err instanceof Error && (err.message.includes("not connected") || err.message.includes("closed"))) {
+      if (
+        err instanceof Error &&
+        (err.message.includes("not connected") || err.message.includes("closed"))
+      ) {
         cleanupMcpClient();
       }
       json(res, 500, { error: err instanceof Error ? err.message : String(err) });

@@ -72,7 +72,8 @@ clearBtn.addEventListener("click", () => {
   seqNum = 0;
   showEmptyState();
   // Also clear chat view
-  chatContainer.innerHTML = '<div class="chat-empty"><div class="chat-empty-icon">💬</div><div>Waiting for messages…</div></div>';
+  chatContainer.innerHTML =
+    '<div class="chat-empty"><div class="chat-empty-icon">💬</div><div>Waiting for messages…</div></div>';
   lastChatSender = "";
   lastChatTimestamp = "";
   seenParticipants.clear();
@@ -181,7 +182,7 @@ function renderEntry(msg: LogMessage): void {
     <span class="log-time">${seq}</span>
     <span class="log-level ${msg.level}">${msg.level}</span>
     <span class="log-category" title="${escapeHtml(msg.category)}">${escapeHtml(msg.category)}</span>
-    <span class="log-summary">${escapeHtml(msg.summary).replace(/ \u2014 /g, '\u00a0\u2014<wbr> ')}</span>
+    <span class="log-summary">${escapeHtml(msg.summary).replace(/ \u2014 /g, "\u00a0\u2014<wbr> ")}</span>
     ${msg.detail != null ? `<div class="log-detail">${escapeHtml(typeof msg.detail === "string" ? msg.detail : JSON.stringify(msg.detail, null, 2))}</div>` : ""}
   `;
 
@@ -338,7 +339,11 @@ tokenSubmit.addEventListener("click", async () => {
     updateSetupDone();
     refreshConfigInfo();
   } catch (err) {
-    setFeedback(tokenFeedback, `Network error: ${err instanceof Error ? err.message : err}`, "error");
+    setFeedback(
+      tokenFeedback,
+      `Network error: ${err instanceof Error ? err.message : err}`,
+      "error",
+    );
   } finally {
     tokenSubmit.removeAttribute("disabled");
   }
@@ -376,18 +381,30 @@ teamSubmit.addEventListener("click", async () => {
     if (data.validated) {
       teamBadge.textContent = "valid";
       teamBadge.className = "badge badge-ok";
-      setFeedback(teamFeedback, `Team ${data.teamId}${orgNote} — ${projectCount} project(s) found`, "success");
+      setFeedback(
+        teamFeedback,
+        `Team ${data.teamId}${orgNote} — ${projectCount} project(s) found`,
+        "success",
+      );
     } else {
       teamBadge.textContent = "saved";
       teamBadge.className = "badge badge-pending";
       const warn = data.warning ? ` (${data.warning})` : "";
-      setFeedback(teamFeedback, `Team ${data.teamId}${orgNote} saved — could not validate${warn}`, "error");
+      setFeedback(
+        teamFeedback,
+        `Team ${data.teamId}${orgNote} saved — could not validate${warn}`,
+        "error",
+      );
     }
     collapseCard(teamCard);
     updateSetupDone();
     refreshConfigInfo();
   } catch (err) {
-    setFeedback(teamFeedback, `Network error: ${err instanceof Error ? err.message : err}`, "error");
+    setFeedback(
+      teamFeedback,
+      `Network error: ${err instanceof Error ? err.message : err}`,
+      "error",
+    );
   } finally {
     teamSubmit.removeAttribute("disabled");
   }
@@ -444,7 +461,10 @@ let replTools: McpTool[] = [];
 let replToolsLoaded = false;
 
 // Key/value map: collects returned values across queries to auto-populate optional params
-interface KnownEntry { value: string; label: string }
+interface KnownEntry {
+  value: string;
+  label: string;
+}
 const replKnownValues: Map<string, KnownEntry[]> = new Map();
 
 function addKnownValue(key: string, value: string, label?: string): void {
@@ -704,12 +724,12 @@ document.querySelectorAll<HTMLButtonElement>(".view-btn").forEach((btn) => {
 
 // Map category → display name and side (outgoing = right/blue, incoming = left/gray)
 const CHAT_ACTORS: Record<string, { name: string; side: "left" | "right"; cssClass: string }> = {
-  server:         { name: "MCP Server",   side: "left",  cssClass: "cat-server" },
-  auth:           { name: "Auth",         side: "left",  cssClass: "cat-auth" },
-  connection:     { name: "Connection",   side: "left",  cssClass: "cat-connection" },
-  "figma-api":    { name: "Figma API",    side: "right", cssClass: "cat-figma-api" },
-  "user-profile": { name: "User Profile", side: "left",  cssClass: "cat-user-profile" },
-  setup:          { name: "Setup",        side: "left",  cssClass: "cat-setup" },
+  server: { name: "MCP Server", side: "left", cssClass: "cat-server" },
+  auth: { name: "Auth", side: "left", cssClass: "cat-auth" },
+  connection: { name: "Connection", side: "left", cssClass: "cat-connection" },
+  "figma-api": { name: "Figma API", side: "right", cssClass: "cat-figma-api" },
+  "user-profile": { name: "User Profile", side: "left", cssClass: "cat-user-profile" },
+  setup: { name: "Setup", side: "left", cssClass: "cat-setup" },
   // Tool calls are requests going OUT to Figma
 };
 
@@ -732,15 +752,17 @@ function getChatActor(msg: LogMessage) {
   if (msg.level === "error") {
     return {
       name: msg.category.replace(/_/g, " "),
-      side: msg.category in CHAT_ACTORS ? CHAT_ACTORS[msg.category].side : "left" as const,
+      side: msg.category in CHAT_ACTORS ? CHAT_ACTORS[msg.category].side : ("left" as const),
       cssClass: msg.category in CHAT_ACTORS ? CHAT_ACTORS[msg.category].cssClass : "cat-default",
     };
   }
-  return CHAT_ACTORS[msg.category] ?? {
-    name: msg.category.replace(/_/g, " "),
-    side: "left" as const,
-    cssClass: "cat-default",
-  };
+  return (
+    CHAT_ACTORS[msg.category] ?? {
+      name: msg.category.replace(/_/g, " "),
+      side: "left" as const,
+      cssClass: "cat-default",
+    }
+  );
 }
 
 const seenParticipants = new Set<string>();
@@ -829,7 +851,8 @@ function renderChatBubble(msg: LogMessage): void {
   if (msg.detail != null) {
     const detailEl = document.createElement("div");
     detailEl.className = "chat-detail";
-    detailEl.textContent = typeof msg.detail === "string" ? msg.detail : JSON.stringify(msg.detail, null, 2);
+    detailEl.textContent =
+      typeof msg.detail === "string" ? msg.detail : JSON.stringify(msg.detail, null, 2);
     bubble.appendChild(detailEl);
     bubble.style.cursor = "pointer";
     bubble.addEventListener("click", () => {

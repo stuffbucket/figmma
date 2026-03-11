@@ -62,7 +62,9 @@ function writeFile(data: ConfigData): void {
 
 /** Get the Figma API token. process.env wins, then config file. */
 export function getToken(): string | undefined {
-  return process.env.FIGMA_API_TOKEN || process.env.FIGMA_TOKEN || readFile().figmaApiToken || undefined;
+  return (
+    process.env.FIGMA_API_TOKEN || process.env.FIGMA_TOKEN || readFile().figmaApiToken || undefined
+  );
 }
 
 /** Get the Figma team ID. process.env wins, then config file. */
@@ -97,7 +99,11 @@ export function setOrgId(orgId: string): void {
 }
 
 /** Get all config values (for status display). */
-export function getAll(): { token: string | undefined; teamId: string | undefined; orgId: string | undefined } {
+export function getAll(): {
+  token: string | undefined;
+  teamId: string | undefined;
+  orgId: string | undefined;
+} {
   return { token: getToken(), teamId: getTeamId(), orgId: getOrgId() };
 }
 

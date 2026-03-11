@@ -109,7 +109,9 @@ server.tool(
   },
   { ...READ_ONLY, title: "Parse a Figma URL" },
   toolHandler("parse_figma_url", async ({ url }) => {
-    logger.log("tool", "parse_figma_url", "Tool called — extracting file key from a Figma URL", { url });
+    logger.log("tool", "parse_figma_url", "Tool called — extracting file key from a Figma URL", {
+      url,
+    });
     const parsed = parseFigmaUrl(url);
     if (!parsed) {
       const msg = "Could not parse that URL. Expected a Figma file/design/proto URL.";
@@ -140,14 +142,14 @@ server.tool(
   { ...READ_ONLY_OPEN, title: "List team projects" },
   toolHandler("list_team_projects", async ({ team_id: explicitTeamId }) => {
     const team_id = resolveTeamId(explicitTeamId);
-    logger.log("tool", "list_team_projects", `Tool called — listing projects in team ${team_id}`, { team_id });
+    logger.log("tool", "list_team_projects", `Tool called — listing projects in team ${team_id}`, {
+      team_id,
+    });
     const projects = await getTeamProjects(team_id);
     if (projects.length === 0) {
       return text(`No projects found in team ${team_id}.`);
     }
-    const formatted = projects
-      .map((p) => `• ${p.name} (ID: ${p.id})`)
-      .join("\n");
+    const formatted = projects.map((p) => `• ${p.name} (ID: ${p.id})`).join("\n");
     const summary = `${projects.length} project(s) in team ${team_id}:\n\n${formatted}`;
     logger.log("tool", "list_team_projects", `Found ${projects.length} project(s)`, projects);
     return text(summary);
@@ -165,7 +167,12 @@ server.tool(
   },
   { ...READ_ONLY_OPEN, title: "List project files" },
   toolHandler("list_project_files", async ({ project_id }) => {
-    logger.log("tool", "list_project_files", `Tool called — listing files in project ${project_id}`, { project_id });
+    logger.log(
+      "tool",
+      "list_project_files",
+      `Tool called — listing files in project ${project_id}`,
+      { project_id },
+    );
     const files = await getProjectFiles(project_id);
     if (files.length === 0) {
       return text(`No files found in project ${project_id}.`);
@@ -196,7 +203,9 @@ server.tool(
       fileKey = parsed.fileKey;
     }
 
-    logger.log("tool", "get_file_info", `Tool called — fetching metadata for file ${fileKey}`, { file_key: fileKey });
+    logger.log("tool", "get_file_info", `Tool called — fetching metadata for file ${fileKey}`, {
+      file_key: fileKey,
+    });
     const meta = await getFileMeta(fileKey);
     const lines = [
       `Name: ${meta.name}`,
@@ -217,7 +226,10 @@ server.tool(
   "search_projects",
   "Search for Figma files by name across all projects in a team. If no team_id is provided, uses the configured default.",
   {
-    team_id: z.string().optional().describe("The Figma team ID to search within (optional if configured via setup)"),
+    team_id: z
+      .string()
+      .optional()
+      .describe("The Figma team ID to search within (optional if configured via setup)"),
     query: z
       .string()
       .describe("Search query to match against file names (case-insensitive substring match)"),
@@ -225,7 +237,12 @@ server.tool(
   { ...READ_ONLY_OPEN, title: "Search for files" },
   toolHandler("search_projects", async ({ team_id: explicitTeamId, query }) => {
     const team_id = resolveTeamId(explicitTeamId);
-    logger.log("tool", "search_projects", `Tool called — searching for "${query}" across team ${team_id}`, { team_id, query });
+    logger.log(
+      "tool",
+      "search_projects",
+      `Tool called — searching for "${query}" across team ${team_id}`,
+      { team_id, query },
+    );
     const results = await searchProjectFiles(team_id, query);
 
     if (results.length === 0) {
@@ -258,9 +275,7 @@ server.tool(
   "get_file_comments",
   "Retrieve all comments on a Figma file. Shows who commented, when, the message content, and whether the comment is resolved. Accepts a file key or a Figma URL.",
   {
-    file_key_or_url: z
-      .string()
-      .describe("The Figma file key or a full Figma URL"),
+    file_key_or_url: z.string().describe("The Figma file key or a full Figma URL"),
     as_md: z.boolean().optional().describe("If true, return comment bodies in Markdown format"),
   },
   { ...READ_ONLY_OPEN, title: "Get file comments" },
@@ -271,7 +286,10 @@ server.tool(
       file_key = parsed.fileKey;
     }
 
-    logger.log("tool", "get_file_comments", `Tool called — fetching comments on file ${file_key}`, { file_key, as_md });
+    logger.log("tool", "get_file_comments", `Tool called — fetching comments on file ${file_key}`, {
+      file_key,
+      as_md,
+    });
     const comments = await getFileComments(file_key, { as_md });
 
     if (comments.length === 0) {
@@ -309,11 +327,16 @@ server.tool(
       .join("\n\n---\n\n");
 
     const summary = `${comments.length} comment(s) on file ${file_key} (${topLevel.length} threads):\n\n${formatted}`;
-    logger.log("tool", "get_file_comments", `${topLevel.length} thread(s), ${replies.length} repl(ies)`, {
-      threads: topLevel.length,
-      replies: replies.length,
-      total: comments.length,
-    });
+    logger.log(
+      "tool",
+      "get_file_comments",
+      `${topLevel.length} thread(s), ${replies.length} repl(ies)`,
+      {
+        threads: topLevel.length,
+        replies: replies.length,
+        total: comments.length,
+      },
+    );
     return text(summary);
   }),
 );
@@ -353,12 +376,8 @@ function spawnDashboard(): void {
   const compiledServer = resolve(__dirname, "dashboard/server.js");
   const isDev = !existsSync(compiledServer);
 
-  const script = isDev
-    ? resolve(__dirname, "dashboard/server.ts")
-    : compiledServer;
-  const args = isDev
-    ? ["--import", "tsx/esm", script]
-    : [script];
+  const script = isDev ? resolve(__dirname, "dashboard/server.ts") : compiledServer;
+  const args = isDev ? ["--import", "tsx/esm", script] : [script];
 
   const child = spawnChild(process.execPath, args, {
     cwd: resolve(__dirname, ".."),
@@ -387,7 +406,11 @@ function openBrowser(url: string): void {
 }
 
 async function launchSetup(): Promise<void> {
-  logger.log("lifecycle", "setup", "No Figma API token found — opening setup wizard in your browser");
+  logger.log(
+    "lifecycle",
+    "setup",
+    "No Figma API token found — opening setup wizard in your browser",
+  );
 
   const dashboardRunning = await probePort(DASHBOARD_PORT);
   if (!dashboardRunning) {
@@ -442,7 +465,12 @@ async function main(): Promise<void> {
   await initializeAuth();
   const user = getCachedUser();
   if (user) {
-    logger.log("lifecycle", "auth", `Authenticated as ${user.handle} (${user.email ?? user.id})`, user);
+    logger.log(
+      "lifecycle",
+      "auth",
+      `Authenticated as ${user.handle} (${user.email ?? user.id})`,
+      user,
+    );
   } else if (!getToken()) {
     // No token at all — launch the dashboard setup wizard & open browser
     await launchSetup();

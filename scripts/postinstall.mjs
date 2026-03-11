@@ -108,7 +108,6 @@ if (isGlobal) {
     console.log(JSON.stringify({ figmma: vscodeEntry }, null, 4).replace(/^/gm, "    "));
     console.log("");
   }
-
 } else {
   // =====================================================================
   // PROJECT INSTALL → project-level agent configs

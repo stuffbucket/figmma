@@ -90,7 +90,6 @@ if (isGlobal) {
   if (!removedVscode) {
     console.log("figmma: If you added figmma to VS Code user settings, remove it manually.");
   }
-
 } else {
   // =====================================================================
   // PROJECT UNINSTALL → project-level agent configs

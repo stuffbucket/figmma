@@ -99,6 +99,7 @@ Add to `.codex/mcp.json` (created automatically by `npm install`):
 On first run with no Figma API token configured, figmma opens a setup wizard in your browser where you enter your [Figma Personal Access Token](https://www.figma.com/developers/api#access-tokens) and team URL.
 
 Configuration is stored at:
+
 - **macOS / Linux:** `~/.config/figmma/config.json`
 - **Windows:** `%APPDATA%\figmma\config.json`
 
@@ -106,19 +107,20 @@ Environment variables `FIGMA_API_TOKEN` and `FIGMA_TEAM_ID` override the config 
 
 ## Tools
 
-| Tool | Description |
-|------|-------------|
-| `get_current_user` | Show the authenticated Figma user (cached) |
-| `parse_figma_url` | Extract file key and node ID from a Figma URL |
-| `list_team_projects` | List all projects in a team |
-| `list_project_files` | List all files in a project |
-| `get_file_info` | Get file metadata (name, version, last modified) |
-| `search_projects` | Search for files by name across all team projects |
-| `get_file_comments` | Retrieve all comments and threads on a file |
+| Tool                 | Description                                       |
+| -------------------- | ------------------------------------------------- |
+| `get_current_user`   | Show the authenticated Figma user (cached)        |
+| `parse_figma_url`    | Extract file key and node ID from a Figma URL     |
+| `list_team_projects` | List all projects in a team                       |
+| `list_project_files` | List all files in a project                       |
+| `get_file_info`      | Get file metadata (name, version, last modified)  |
+| `search_projects`    | Search for files by name across all team projects |
+| `get_file_comments`  | Retrieve all comments and threads on a file       |
 
 ## Dashboard
 
 figmma includes a real-time observability dashboard at `http://localhost:5183` that shows:
+
 - Live MCP tool calls and Figma API requests
 - Connection state and auth status
 - An interactive REPL to test tools from the browser

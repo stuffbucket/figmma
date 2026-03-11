@@ -1,12 +1,12 @@
 import WebSocket from "ws";
 import { createConnection } from "net";
+import { DASHBOARD_PORT } from "./config.js";
 
-const OBSERVER_PORT = 5183;
 const RECONNECT_INTERVAL_MS = 5000;
 
 export type LogLevel = "info" | "tool" | "request" | "response" | "error" | "lifecycle";
 
-export interface ObserverMessage {
+export interface LogMessage {
   timestamp: string;
   level: LogLevel;
   category: string;
@@ -15,15 +15,15 @@ export interface ObserverMessage {
 }
 
 /**
- * Observer client that lives inside the MCP process.
+ * Logger client that lives inside the MCP server process.
  * It probes localhost:5183 — if a dashboard is listening, it connects
- * via WebSocket and streams human-readable log messages.
+ * via WebSocket and streams structured log messages to the UI.
  * If nothing is listening, it silently no-ops so the MCP works normally.
  */
-class Observer {
+class Logger {
   private ws: WebSocket | null = null;
   private connected = false;
-  private buffer: ObserverMessage[] = [];
+  private buffer: LogMessage[] = [];
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private destroyed = false;
 
@@ -37,10 +37,10 @@ class Observer {
     }
   }
 
-  /** Quick TCP probe to see if anything is listening on the observer port */
+  /** Quick TCP probe to see if anything is listening on the dashboard port */
   private probe(): Promise<boolean> {
     return new Promise((resolve) => {
-      const sock = createConnection({ host: "127.0.0.1", port: OBSERVER_PORT }, () => {
+      const sock = createConnection({ host: "127.0.0.1", port: DASHBOARD_PORT }, () => {
         sock.destroy();
         resolve(true);
       });
@@ -55,7 +55,7 @@ class Observer {
   private connect(): void {
     if (this.destroyed) return;
     try {
-      this.ws = new WebSocket(`ws://127.0.0.1:${OBSERVER_PORT}`);
+      this.ws = new WebSocket(`ws://127.0.0.1:${DASHBOARD_PORT}`);
 
       this.ws.on("open", () => {
         this.connected = true;
@@ -97,7 +97,7 @@ class Observer {
     this.reconnectTimer.unref();
   }
 
-  private send(msg: ObserverMessage): void {
+  private send(msg: LogMessage): void {
     if (this.ws && this.connected) {
       try {
         this.ws.send(JSON.stringify(msg));
@@ -109,7 +109,7 @@ class Observer {
 
   /** Log a message. Buffers briefly if not yet connected. */
   log(level: LogLevel, category: string, summary: string, detail?: unknown): void {
-    const msg: ObserverMessage = {
+    const msg: LogMessage = {
       timestamp: new Date().toISOString(),
       level,
       category,
@@ -138,4 +138,4 @@ class Observer {
 }
 
 // Singleton
-export const observer = new Observer();
+export const logger = new Logger();

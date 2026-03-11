@@ -1,4 +1,4 @@
-import { observer } from "./observer.js";
+import { logger } from "./logger.js";
 import { getToken as getConfigToken } from "./config.js";
 
 const FIGMA_API_BASE = "https://api.figma.com/v1";
@@ -7,7 +7,7 @@ function getToken(): string {
   const token = getConfigToken();
   if (!token) {
     throw new Error(
-      "Missing Figma API token. Set FIGMA_API_TOKEN in your MCP client env, or run the dashboard setup.",
+      "Missing Figma API token. Set FIGMA_API_TOKEN in your MCP client env, or refresh the dashboard page to run setup.",
     );
   }
   return token;
@@ -21,7 +21,7 @@ async function figmaFetch<T>(path: string, params?: Record<string, string>): Pro
     }
   }
 
-  observer.log("request", "figma-api", `GET ${url.pathname}${url.search}`);
+  logger.log("request", "figma-api", `→ GET ${url.pathname}${url.search}`);
 
   const res = await fetch(url.toString(), {
     headers: { "X-Figma-Token": getToken() },
@@ -29,12 +29,12 @@ async function figmaFetch<T>(path: string, params?: Record<string, string>): Pro
 
   if (!res.ok) {
     const body = await res.text();
-    observer.log("error", "figma-api", `${res.status} ${res.statusText}`, body);
+    logger.log("error", "figma-api", `← ${res.status} ${res.statusText} for ${url.pathname}`, body);
     throw new Error(`Figma API error ${res.status}: ${body}`);
   }
 
   const data = (await res.json()) as T;
-  observer.log("response", "figma-api", `${res.status} OK for ${url.pathname}`);
+  logger.log("response", "figma-api", `← ${res.status} OK for ${url.pathname}`, data);
   return data;
 }
 
@@ -87,7 +87,7 @@ let cachedUser: FigmaUser | null = null;
 export async function getMe(): Promise<FigmaUser> {
   if (cachedUser) return cachedUser;
   cachedUser = await figmaFetch<FigmaUser>("/me");
-  observer.log("lifecycle", "user-profile", `Authenticated as ${cachedUser.handle}`, cachedUser);
+  logger.log("lifecycle", "user-profile", `Authenticated as ${cachedUser.handle}`, cachedUser);
   return cachedUser;
 }
 
@@ -106,7 +106,7 @@ export async function initializeAuth(): Promise<void> {
     await getMe();
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    observer.log("error", "figma-auth", `Could not authenticate on startup: ${msg}`);
+    logger.log("error", "auth", `Could not authenticate on startup: ${msg}`);
   }
 }
 
@@ -136,16 +136,22 @@ export async function searchProjectFiles(
   teamId: string,
   query: string,
 ): Promise<Array<FigmaProjectFile & { project_name: string; project_id: string }>> {
-  observer.log("info", "search", `Searching team ${teamId} for files matching "${query}"`);
+  logger.log("info", "search", `Searching team ${teamId} for files matching "${query}"`);
 
   const projects = await getTeamProjects(teamId);
-  observer.log("info", "search", `Found ${projects.length} projects in team ${teamId}`);
+  logger.log("info", "search", `Scanning ${projects.length} project(s) in team ${teamId}`);
+
+  const projectFiles = await Promise.all(
+    projects.map(async (project) => {
+      const files = await getProjectFiles(project.id);
+      return { project, files };
+    }),
+  );
 
   const results: Array<FigmaProjectFile & { project_name: string; project_id: string }> = [];
   const lowerQuery = query.toLowerCase();
 
-  for (const project of projects) {
-    const files = await getProjectFiles(project.id);
+  for (const { project, files } of projectFiles) {
     for (const file of files) {
       if (file.name.toLowerCase().includes(lowerQuery)) {
         results.push({
@@ -157,7 +163,7 @@ export async function searchProjectFiles(
     }
   }
 
-  observer.log("info", "search", `Found ${results.length} files matching "${query}"`);
+  logger.log("info", "search", `Found ${results.length} file(s) matching "${query}"`, results);
   return results;
 }
 

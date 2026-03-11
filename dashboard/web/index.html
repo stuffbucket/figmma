@@ -10,7 +10,10 @@
     <!-- Setup overlay — shown when PAT or team ID is missing -->
     <div id="setup-overlay" class="setup-overlay hidden">
       <div class="setup-container">
-        <h2 class="setup-title">figmma Setup</h2>
+        <div class="setup-title-row">
+          <h2 class="setup-title">figmma Setup</h2>
+          <button id="setup-close" class="setup-close-btn" title="Close">✕</button>
+        </div>
         <p class="setup-subtitle">Configure your Figma connection to get started.</p>
 
         <!-- Card 1: API Token -->
@@ -21,9 +24,12 @@
             <span id="token-status-badge" class="badge badge-pending">required</span>
           </div>
           <ol class="setup-steps">
-            <li>Open <a href="https://www.figma.com/developers/api#access-tokens" target="_blank" rel="noopener">Figma → Settings → Personal Access Tokens</a></li>
-            <li>Click <strong>"Generate new token"</strong>, give it a description, and copy it</li>
-            <li>Paste the token below:</li>
+            <li>Log in to <a href="https://www.figma.com/" target="_blank" rel="noopener">Figma</a> and open the <a href="https://help.figma.com/hc/articles/14381406380183-Guide-to-the-file-browser" target="_blank" rel="noopener">file browser</a></li>
+            <li>Click the <strong>account menu</strong> (top-left corner) → <strong>Settings</strong></li>
+            <li>Select the <strong>Security</strong> tab</li>
+            <li>Under <em>Personal access tokens</em>, click <strong>"Generate new token"</strong></li>
+            <li>Set the expiration and <a href="https://developers.figma.com/docs/rest-api/scopes/" target="_blank" rel="noopener">scopes</a> your token needs, then click <strong>Generate token</strong></li>
+            <li>Copy the token (you won't be able to see it again) and paste it below:</li>
           </ol>
           <div class="setup-input-row">
             <input id="token-input" type="password" class="setup-input" placeholder="figd_..." autocomplete="off" />
@@ -33,24 +39,25 @@
           <div id="token-feedback" class="setup-feedback"></div>
         </div>
 
-        <!-- Card 2: Team Discovery -->
+        <!-- Card 2: Team & Organization -->
         <div class="setup-card" id="setup-team-card">
           <div class="setup-card-header">
             <span class="setup-step">2</span>
-            <h3>Team ID</h3>
-            <span id="team-status-badge" class="badge badge-pending">required</span>
+            <h3>Team &amp; Organization</h3>
+            <span id="team-status-badge" class="badge badge-pending">optional</span>
           </div>
           <ol class="setup-steps">
             <li><a href="https://www.figma.com/files/" target="_blank" rel="noopener">Open Figma in your browser</a> (log in if needed)</li>
-            <li>In the left sidebar, click on your <strong>team name</strong></li>
-            <li>Your browser's address bar will show a URL like:<br />
-              <code class="setup-url-example">figma.com/files/team/<strong>123456789</strong>/Your-Team</code>
+            <li>In the left sidebar, click on a <strong>team name</strong> (e.g. &ldquo;AI Projects&rdquo;)</li>
+            <li>The URL should look like:<br />
+              <code class="setup-url-example">figma.com/files/<strong>{orgId}</strong>/team/<strong>{teamId}</strong></code><br />
+              <span class="setup-hint">&nbsp;&#x26A0; A file URL (<code>/design/...</code>) or org-only URL (<code>/files/{orgId}</code>) won&rsquo;t have a team ID.</span>
             </li>
-            <li>Copy that URL (or just the number) and paste it below:</li>
+            <li>Paste the full URL below &mdash; the org and team IDs will be extracted automatically:</li>
           </ol>
           <div class="setup-input-row">
-            <input id="team-input" class="setup-input" placeholder="https://www.figma.com/files/team/... or just the ID" autocomplete="off" />
-            <button id="team-submit" class="setup-btn">Validate &amp; Save</button>
+            <input id="team-input" class="setup-input" placeholder="https://www.figma.com/files/{orgId}/team/{teamId} or just the team ID" autocomplete="off" />
+            <button id="team-submit" class="setup-btn">Save</button>
           </div>
           <div id="team-feedback" class="setup-feedback"></div>
         </div>
@@ -65,6 +72,12 @@
         <h1>figmma <span class="subtitle">MCP Dashboard</span></h1>
       </div>
       <div class="header-right">
+        <div id="config-info" class="config-info">
+          <span id="token-status" class="config-chip token-chip" title="Personal Access Token">PAT: &mdash;</span>
+          <span id="org-display" class="config-chip org-chip" title="Organization ID">Org: &mdash;</span>
+          <span id="team-display" class="config-chip team-chip" title="Team ID">Team: &mdash;</span>
+        </div>
+        <button id="settings-btn" class="settings-btn" title="Settings"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="2" y1="4" x2="14" y2="4"/><line x1="2" y1="8" x2="14" y2="8"/><line x1="2" y1="12" x2="14" y2="12"/><circle cx="5" cy="4" r="1.5" fill="currentColor"/><circle cx="10" cy="8" r="1.5" fill="currentColor"/><circle cx="7" cy="12" r="1.5" fill="currentColor"/></svg></button>
         <div id="user-profile" class="user-profile hidden">
           <img id="user-avatar" class="user-avatar" alt="" />
           <div class="user-info">
@@ -77,18 +90,87 @@
     </header>
 
     <div class="controls">
-      <div class="filters">
-        <button class="filter active" data-level="all">All</button>
-        <button class="filter" data-level="lifecycle">Lifecycle</button>
-        <button class="filter" data-level="tool">Tools</button>
-        <button class="filter" data-level="request">Requests</button>
-        <button class="filter" data-level="response">Responses</button>
-        <button class="filter" data-level="error">Errors</button>
+      <div class="controls-left">
+        <div class="view-switcher">
+          <button class="view-btn active" data-view="log" title="Log view">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="1" y1="3" x2="13" y2="3"/><line x1="1" y1="7" x2="13" y2="7"/><line x1="1" y1="11" x2="9" y2="11"/></svg>
+          </button>
+          <button class="view-btn" data-view="chat" title="Chat view">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 2.5C1 1.67 1.67 1 2.5 1h9c.83 0 1.5.67 1.5 1.5v7c0 .83-.67 1.5-1.5 1.5H4l-2.5 2V2.5z"/></svg>
+          </button>
+        </div>
+        <div class="filters">
+          <button class="filter active" data-level="all">All</button>
+          <button class="filter" data-level="lifecycle">Lifecycle</button>
+          <button class="filter" data-level="tool">Tools</button>
+          <button class="filter" data-level="request">Requests</button>
+          <button class="filter" data-level="response">Responses</button>
+          <button class="filter" data-level="error">Errors</button>
+        </div>
       </div>
       <button id="clear-btn" class="clear-btn">Clear</button>
     </div>
 
-    <main id="log-container"></main>
+    <div id="log-header" class="log-header">
+      <div class="log-header-cell" data-col="0">#<span class="col-resize"></span></div>
+      <div class="log-header-cell" data-col="1">Level<span class="col-resize"></span></div>
+      <div class="log-header-cell" data-col="2">Category<span class="col-resize"></span></div>
+      <div class="log-header-cell" data-col="3">Message</div>
+    </div>
+
+    <!-- Chat view (iMessage style) — hidden by default -->
+    <div id="chat-view" class="chat-view hidden">
+      <div class="chat-header-bar">
+        <div class="chat-group-name">
+          <span class="chat-group-icon">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><circle cx="5" cy="6" r="2.5"/><circle cx="11" cy="6" r="2.5"/><path d="M1 13c0-2.2 1.8-4 4-4 .7 0 1.4.2 2 .5a4 4 0 0 0-2 3.5v0H1zm14 0h-4a4 4 0 0 0-2-3.5c.6-.3 1.3-.5 2-.5 2.2 0 4 1.8 4 4z"/></svg>
+          </span>
+          MCP Group Chat
+        </div>
+        <div class="chat-participants" id="chat-participants"></div>
+      </div>
+      <div class="chat-scroll" id="chat-scroll">
+        <div class="chat-container" id="chat-container">
+          <div class="chat-empty">
+            <div class="chat-empty-icon">💬</div>
+            <div>Waiting for messages…</div>
+          </div>
+        </div>
+      </div>
+      <div class="chat-typing-bar" id="chat-typing-bar">
+        <div class="chat-typing-indicator hidden" id="chat-typing">
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="workspace split">
+      <div class="logs-panel">
+        <main id="log-container"></main>
+      </div>
+
+      <button id="split-toggle" class="split-handle open" title="Toggle Tools">
+        <svg width="10" height="16" viewBox="0 0 10 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="8,2 2,8 8,14" />
+        </svg>
+      </button>
+
+      <div id="repl-panel" class="repl-panel">
+        <div class="repl-toolbar">
+          <span class="repl-label">Tools</span>
+          <select id="repl-tool" class="repl-select" aria-label="Select a tool to run">
+            <option value="">Loading tools…</option>
+          </select>
+          <button id="repl-run" class="repl-run-btn" disabled>▶ Run</button>
+        </div>
+        <div id="repl-params" class="repl-params"></div>
+        <div id="repl-output" class="repl-output">
+          <div class="repl-empty">Select a tool and click Run</div>
+        </div>
+      </div>
+    </div>
 
     <script type="module" src="./main.ts"></script>
   </body>

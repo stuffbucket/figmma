@@ -7,7 +7,9 @@
     "figmma": "dist/index.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && vite build",
+    "build:server": "tsc",
+    "build:ui": "vite build",
     "mcp": "tsx src/index.ts",
     "dashboard": "tsx src/dashboard/server.ts",
     "dev": "tsx src/dashboard/server.ts",
@@ -17,7 +19,7 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist *.tsbuildinfo",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "npx tsx test/unit.ts && npx tsx test/e2e.ts --tools",
     "postinstall": "node scripts/postinstall.mjs",
     "preuninstall": "node scripts/preuninstall.mjs"
   },

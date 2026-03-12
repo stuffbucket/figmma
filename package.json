@@ -1,6 +1,6 @@
 {
   "name": "@stuffbucket/figmma",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "MCP server with real-time observability dashboard",
   "main": "dist/index.js",
   "bin": {

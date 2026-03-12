@@ -4,16 +4,22 @@ MCP server for the Figma API with a real-time observability dashboard.
 
 ## Install
 
-**One-liner** (checks for Node.js, installs if missing, registers with all agents):
+**macOS / Linux** (checks for Node.js, installs if missing, registers with all agents):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/stuffbucket/figmma/main/install.sh | bash
 ```
 
+**Windows (PowerShell):**
+
+```powershell
+irm https://raw.githubusercontent.com/stuffbucket/figmma/main/install.ps1 | iex
+```
+
 **Or via npm** (requires Node.js >= 18):
 
 ```bash
-npm install figmma
+npm install -g @stuffbucket/figmma
 ```
 
 The postinstall script automatically registers figmma with Claude Code, VS Code / GitHub Copilot, and Codex CLI.
@@ -25,7 +31,7 @@ The postinstall script automatically registers figmma with Claude Code, VS Code 
 **Project-level** (recommended — runs `postinstall` automatically):
 
 ```bash
-npm install figmma
+npm install @stuffbucket/figmma
 ```
 
 Or add manually to `.mcp.json`:
@@ -35,7 +41,7 @@ Or add manually to `.mcp.json`:
   "mcpServers": {
     "figmma": {
       "command": "npx",
-      "args": ["-y", "figmma"]
+      "args": ["-y", "@stuffbucket/figmma"]
     }
   }
 }
@@ -44,7 +50,7 @@ Or add manually to `.mcp.json`:
 **User-level** (available in all projects):
 
 ```bash
-claude mcp add --transport stdio figmma --scope user -- npx -y figmma
+claude mcp add --transport stdio figmma --scope user -- npx -y @stuffbucket/figmma
 ```
 
 ### VS Code / GitHub Copilot
@@ -57,7 +63,7 @@ claude mcp add --transport stdio figmma --scope user -- npx -y figmma
     "figmma": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "figmma"]
+      "args": ["-y", "@stuffbucket/figmma"]
     }
   }
 }
@@ -72,7 +78,7 @@ claude mcp add --transport stdio figmma --scope user -- npx -y figmma
       "figmma": {
         "type": "stdio",
         "command": "npx",
-        "args": ["-y", "figmma"]
+        "args": ["-y", "@stuffbucket/figmma"]
       }
     }
   }
@@ -88,7 +94,7 @@ Add to `.codex/mcp.json` (created automatically by `npm install`):
   "mcpServers": {
     "figmma": {
       "command": "npx",
-      "args": ["-y", "figmma"]
+      "args": ["-y", "@stuffbucket/figmma"]
     }
   }
 }
@@ -128,7 +134,7 @@ figmma includes a real-time observability dashboard at `http://localhost:5183` t
 The dashboard starts automatically when the MCP server launches. Run it standalone with:
 
 ```bash
-npx figmma-dashboard   # or: npm run dev (in the source repo)
+npx @stuffbucket/figmma-dashboard   # or: npm run dev (in the source repo)
 ```
 
 ## Development
@@ -148,7 +154,7 @@ make pack            # Build + npm pack → figmma-1.0.0.tgz
 ## Uninstall
 
 ```bash
-npm uninstall figmma
+npm uninstall -g @stuffbucket/figmma
 ```
 
 This removes the MCP server entries from `.mcp.json`, `.vscode/mcp.json`, and `.codex/mcp.json`.

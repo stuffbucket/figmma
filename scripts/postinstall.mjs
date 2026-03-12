@@ -20,7 +20,7 @@ if (!isGlobal && !projectRoot) process.exit(0);
 
 const entry = {
   command: "npx",
-  args: ["-y", "figmma"],
+  args: ["-y", "@stuffbucket/figmma"],
 };
 
 // --- Helpers ---

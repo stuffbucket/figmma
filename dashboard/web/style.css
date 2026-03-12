@@ -1394,6 +1394,12 @@ main {
   gap: var(--space-3);
 }
 
+.chat-bubble-row.hidden,
+.chat-sender.hidden,
+.chat-read-receipt.hidden {
+  display: none;
+}
+
 .chat-bubble-row.right {
   flex-direction: row-reverse;
 }

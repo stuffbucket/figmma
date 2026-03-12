@@ -57,6 +57,7 @@ document.querySelectorAll<HTMLButtonElement>(".filter").forEach((btn) => {
 });
 
 function applyFilter(): void {
+  // Filter log view entries
   document.querySelectorAll<HTMLElement>(".log-entry").forEach((el) => {
     if (activeFilter === "all" || el.dataset.level === activeFilter) {
       el.classList.remove("hidden");
@@ -64,6 +65,17 @@ function applyFilter(): void {
       el.classList.add("hidden");
     }
   });
+  // Filter chat view bubbles, sender labels, and read receipts
+  document
+    .querySelectorAll<HTMLElement>(".chat-bubble-row, .chat-read-receipt, .chat-sender")
+    .forEach((el) => {
+      if (!el.dataset.level) return; // skip untagged elements (timestamps)
+      if (activeFilter === "all" || el.dataset.level === activeFilter) {
+        el.classList.remove("hidden");
+      } else {
+        el.classList.add("hidden");
+      }
+    });
 }
 
 // ---- Clear ----
@@ -784,6 +796,123 @@ function showTypingIndicator(): void {
   setTimeout(() => chatTypingEl.classList.add("hidden"), 800);
 }
 
+// ---- Friendly text for chat bubbles ----
+// Rewrites terse/protocol summaries into plain-language descriptions.
+// Returns null to keep the original summary unchanged.
+
+function friendlyText(msg: LogMessage): string {
+  const s = msg.summary;
+  const cat = msg.category;
+  const lvl = msg.level;
+
+  // ── Tool call messages (right side) ──
+  if (lvl === "tool") {
+    // Already prefixed with "Tool called — …", strip it for chat
+    if (s.startsWith("Tool called — ")) return s.slice("Tool called — ".length);
+    if (s.startsWith("Tool called —")) return s.slice("Tool called —".length).trimStart();
+    return s;
+  }
+
+  // ── Response messages (left side) ──
+  if (lvl === "response") {
+    // Raw HTTP responses from figma.ts — "← 200 OK for /v1/me"
+    const httpMatch = s.match(/^← (\d+) OK for (.+)$/);
+    if (httpMatch) {
+      const endpoint = httpMatch[2];
+      if (endpoint.includes("/me")) return "Got your Figma profile from the API";
+      if (endpoint.includes("/projects")) return "Got the project list from Figma";
+      if (endpoint.includes("/files")) return "Got the file list from Figma";
+      if (endpoint.includes("/comments")) return "Got the comments from Figma";
+      return `Figma responded with success for ${endpoint}`;
+    }
+
+    // Tool results — already fairly readable, just soften them
+    if (cat === "get_current_user" && s.startsWith("Authenticated as "))
+      return `You're signed in as ${s.slice("Authenticated as ".length)}`;
+
+    if (cat === "parse_figma_url" && s.startsWith("Extracted file key "))
+      return `Found the file key: ${s.slice("Extracted file key ".length)}`;
+
+    // "Found N project(s)" → "Found N projects in your team"
+    const projMatch = s.match(/^Found (\d+) project\(s\)$/);
+    if (projMatch) return `Found ${projMatch[1]} projects in your team`;
+
+    // "Found N file(s)"
+    const fileMatch = s.match(/^Found (\d+) file\(s\)$/);
+    if (fileMatch) return `Found ${fileMatch[1]} files in the project`;
+
+    // "File: Design System"
+    if (cat === "get_file_info" && s.startsWith("File: "))
+      return `Got metadata for "${s.slice("File: ".length)}"`;
+
+    // "Found N matching file(s)"
+    const searchMatch = s.match(/^Found (\d+) matching file\(s\)$/);
+    if (searchMatch) return `Search found ${searchMatch[1]} matching files`;
+
+    // "No files found matching …"
+    if (s.startsWith("No files found matching")) return `No matching files — ${s}`;
+
+    // "N thread(s), N repl(ies)"
+    const commentMatch = s.match(/^(\d+) thread\(s\), (\d+) repl\(ies\)$/);
+    if (commentMatch)
+      return `Got ${commentMatch[1]} comment threads with ${commentMatch[2]} replies`;
+
+    // "No comments found on file …"
+    if (s.startsWith("No comments found")) return "This file doesn't have any comments yet";
+
+    return s;
+  }
+
+  // ── HTTP requests — "→ GET /v1/me" ──
+  if (lvl === "request") {
+    const reqMatch = s.match(/^→ (GET|POST|PUT|DELETE) (.+)$/);
+    if (reqMatch) {
+      const endpoint = reqMatch[2];
+      if (endpoint.includes("/me")) return "Asking Figma who you are…";
+      if (endpoint.includes("/projects")) return "Asking Figma for the project list…";
+      if (endpoint.includes("/files")) return "Asking Figma for the file list…";
+      if (endpoint.includes("/comments")) return "Asking Figma for comments…";
+      return `Calling the Figma API (${reqMatch[1]} ${endpoint})`;
+    }
+    return s;
+  }
+
+  // ── Lifecycle messages ──
+  if (lvl === "lifecycle") {
+    if (s.includes("MCP server started")) return "Server started, waiting for an agent to connect";
+    if (s.includes("session is now active")) return "Your agent connected — ready to go!";
+    if (s.includes("session ended") || s.includes("disconnected")) return "Agent disconnected";
+    if (s.includes("Server is ready")) return "Ready for tool calls";
+    if (s.includes("Authenticated as")) {
+      const name = s.match(/Authenticated as (.+?)(?:\s*\(|$)/)?.[1] ?? "";
+      return name ? `Signed in as ${name}` : "Signed in to Figma";
+    }
+    if (s.includes("No Figma API token")) return "No API token found — opening setup wizard";
+    if (s.includes("Setup wizard opened")) return "Setup wizard is open in your browser";
+    return s;
+  }
+
+  // ── Info messages (search progress) ──
+  if (lvl === "info") {
+    if (s.includes("Searching team")) return "Searching across all team projects…";
+    const scanMatch = s.match(/Scanning (\d+) project/);
+    if (scanMatch) return `Scanning ${scanMatch[1]} projects for matching files…`;
+    const foundMatch = s.match(/Found (\d+) file/);
+    if (foundMatch) return `Search complete — ${foundMatch[1]} matches`;
+    return s;
+  }
+
+  // ── Errors ──
+  if (lvl === "error") {
+    if (s.startsWith("Failed: ")) return `Something went wrong: ${s.slice("Failed: ".length)}`;
+    if (s.includes("Could not authenticate")) return "Couldn't sign in — check your API token";
+    if (s.includes("Could not parse")) return "That doesn't look like a valid Figma URL";
+    return s;
+  }
+
+  return s;
+}
+
 function renderChatBubble(msg: LogMessage): void {
   // Remove empty state
   chatContainer.querySelector(".chat-empty")?.remove();
@@ -815,12 +944,17 @@ function renderChatBubble(msg: LogMessage): void {
   }
   lastChatTimestamp = msg.timestamp;
 
+  // Whether this message is hidden by the current filter
+  const filtered = activeFilter !== "all" && msg.level !== activeFilter;
+
   // Sender label — only when sender changes
   const consecutive = lastChatSender === senderKey;
   if (!consecutive) {
     const label = document.createElement("div");
     label.className = `chat-sender ${actor.cssClass}${isRight ? " right" : ""}`;
+    label.dataset.level = msg.level;
     label.textContent = actor.name;
+    if (filtered) label.classList.add("hidden");
     chatContainer.appendChild(label);
   }
   lastChatSender = senderKey;
@@ -828,6 +962,8 @@ function renderChatBubble(msg: LogMessage): void {
   // Bubble row
   const row = document.createElement("div");
   row.className = `chat-bubble-row${isRight ? " right" : ""}`;
+  row.dataset.level = msg.level;
+  if (filtered) row.classList.add("hidden");
 
   // Bubble
   const bubble = document.createElement("div");
@@ -842,9 +978,9 @@ function renderChatBubble(msg: LogMessage): void {
     });
   });
 
-  // Message text
+  // Message text (friendly for chat, original stays in log view)
   const textNode = document.createElement("span");
-  textNode.textContent = msg.summary;
+  textNode.textContent = friendlyText(msg);
   bubble.appendChild(textNode);
 
   // Expandable detail
@@ -879,7 +1015,9 @@ function renderChatBubble(msg: LogMessage): void {
   if (isRight && !isError) {
     const receipt = document.createElement("div");
     receipt.className = "chat-read-receipt";
+    receipt.dataset.level = msg.level;
     receipt.textContent = "Delivered";
+    if (filtered) receipt.classList.add("hidden");
     chatContainer.appendChild(receipt);
   }
 

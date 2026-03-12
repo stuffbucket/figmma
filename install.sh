@@ -1,15 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# figmma installer — checks dependencies and installs into the current project.
+# figmma installer — checks dependencies and installs globally.
 #
 # Usage:
 #   curl -fsSL https://raw.githubusercontent.com/stuffbucket/figmma/main/install.sh | bash
-#   curl -fsSL https://raw.githubusercontent.com/stuffbucket/figmma/main/install.sh | bash -s -- --global
 #
 # What it does:
 #   1. Checks for Node.js >= 18 (installs if missing)
-#   2. Runs `npm install figmma` (or `npm install -g figmma`)
+#   2. Runs `npm install -g @stuffbucket/figmma`
 #   3. postinstall registers the MCP server with Claude Code, VS Code, and Codex
 
 BOLD="\033[1m"
@@ -26,14 +25,11 @@ error() { echo -e "${RED}✘${RESET} $*" >&2; }
 step()  { echo -e "\n${BOLD}$*${RESET}"; }
 
 # --- Parse flags ---
-GLOBAL=false
 for arg in "$@"; do
   case "$arg" in
-    --global|-g) GLOBAL=true ;;
     --help|-h)
-      echo "Usage: install.sh [--global]"
-      echo "  --global, -g   Install globally (npm install -g)"
-      echo "  (default)      Install into the current project"
+      echo "Usage: install.sh"
+      echo "  Installs @stuffbucket/figmma globally via npm"
       exit 0
       ;;
   esac
@@ -148,34 +144,20 @@ fi
 info "npm $(npm -v) found"
 
 # --- Install figmma ---
-step "Installing figmma..."
-
-if [ "$GLOBAL" = true ]; then
-  npm install -g figmma
-  info "figmma installed globally"
-else
-  npm install figmma
-  info "figmma installed"
-fi
+step "Installing @stuffbucket/figmma..."
+npm install -g @stuffbucket/figmma
+info "figmma installed globally"
 
 # --- Summary ---
 step "Done!"
 echo ""
-
-if [ "$GLOBAL" = true ]; then
-  echo "  The postinstall script registered figmma with:"
-  echo "    • Claude Code     (~/.claude.json)"
-  echo "    • Codex CLI       (~/.codex/mcp.json)"
-  echo ""
-  echo "  For VS Code / GitHub Copilot, follow the instructions printed above"
-  echo "  to add the MCP entry to your VS Code settings.json."
-else
-  echo "  The postinstall script registered figmma with:"
-  echo "    • Claude Code     (.mcp.json)"
-  echo "    • VS Code / Copilot (.vscode/mcp.json)"
-  echo "    • Codex CLI       (.codex/mcp.json)"
-fi
+echo "  The postinstall script registered figmma with:"
+echo "    • Claude Code     (~/.claude.json)"
+echo "    • Codex CLI       (~/.codex/mcp.json)"
+echo ""
+echo "  For VS Code / GitHub Copilot, follow the instructions printed above"
+echo "  to add the MCP entry to your VS Code settings.json."
 echo ""
 echo "  Start your agent — figmma's Figma tools are ready to use."
-echo "  Run 'npx figmma' to test, or open the dashboard at http://localhost:5183"
+echo "  Run 'npx @stuffbucket/figmma' to test, or open the dashboard at http://localhost:5183"
 echo ""

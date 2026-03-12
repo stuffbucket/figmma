@@ -45,15 +45,14 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, "");
             Your agent<br /><span class="text-gradient">speaks Figma</span>
           </h1>
           <p class="hero-tagline">
-            Give your AI coding agent full access to the Figma API.<br />
-            List projects, search files, read metadata, pull comments — all through
-            <span class="text-gradient"><b>Model Context Protocol</b></span>.
+            Give your AI coding agent full access to more of the Figma API.<br />
+            List projects, search files, pull comments while learning about the <span class="text-gradient"><b>Model Context Protocol</b></span>.
           </p>
 
           <div class="install-command" id="install-box">
             <span class="install-prompt">$</span>
             <span class="install-text" id="install-text"
-              >npm install figmma</span
+              >curl -fsSL https://raw.githubusercontent.com/stuffbucket/figmma/main/install.sh | bash</span
             >
             <button
               class="install-copy"
@@ -91,8 +90,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, "");
           </div>
 
           <div class="hero-actions">
-            <a class="primary" href="#tools">See the tools</a>
-            <a class="secondary" href="#configure">Configure</a>
+            <a class="primary" href="#dashboard">See the dashboard</a>
+            <a class="secondary" href="#configure">Setup guide</a>
           </div>
         </div>
       </section>
@@ -115,8 +114,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, "");
           </div>
           <h3>Zero config</h3>
           <p>
-            Run <code>npm install figmma</code> — postinstall registers with
-            Claude Code, VS Code, and Codex automatically.
+            One curl command checks prereqs, installs Node.js if needed,
+            and registers with Claude Code, VS Code, and Codex automatically.
           </p>
         </div>
         <div class="feature">
@@ -278,33 +277,234 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, "");
         </table>
       </section>
 
-      <!-- ── Configure ────────────────────────────────────── -->
-      <section class="config-section" id="configure">
+      <!-- ── See what's happening ─────────────────────── -->
+      <section class="dashboard-section" id="dashboard">
         <h2>
-          Configure for <span class="text-gradient">your agent</span>
+          See <span class="text-gradient">what's happening</span>
         </h2>
-        <div class="config-grid">
-          <div class="config-card">
-            <h3>Claude Code</h3>
-            <pre><code>{JSON.stringify({ mcpServers: { figmma: { command: "npx", args: ["-y", "figmma"] } } }, null, 2)}</code></pre>
+        <p class="dashboard-intro">
+          MCP servers are invisible by default — your agent talks to them
+          behind the scenes and you never see the conversation. figmma ships
+          with a <strong>live dashboard</strong> that makes the whole thing
+visible, so you can actually learn what's going on.
+        </p>
+
+        <div class="dashboard-showcase">
+          <!-- Screenshot 1: Activity log -->
+          <div class="showcase-item">
+            <div class="showcase-img">
+              <img
+                src={`${base}/screenshots/dashboard-log.png`}
+                alt="figmma dashboard showing a live log of MCP tool calls and API requests"
+                loading="lazy"
+              />
+            </div>
+            <div class="showcase-text">
+              <h3>Watch every tool call in real time</h3>
+              <p>
+                Every time your agent calls a Figma tool, the dashboard logs
+                it instantly — what tool was called, what parameters were sent,
+                and what came back. You can see the MCP protocol in action
+                instead of guessing what happened.
+              </p>
+            </div>
           </div>
-          <div class="config-card">
-            <h3>VS Code / Copilot</h3>
-            <pre><code>{JSON.stringify({ servers: { figmma: { type: "stdio", command: "npx", args: ["-y", "figmma"] } } }, null, 2)}</code></pre>
+
+          <!-- Screenshot 2: Setup wizard -->
+          <div class="showcase-item showcase-reverse">
+            <div class="showcase-img">
+              <img
+                src={`${base}/screenshots/dashboard-setup.png`}
+                alt="figmma setup wizard guiding through token entry and team configuration"
+                loading="lazy"
+              />
+            </div>
+            <div class="showcase-text">
+              <h3>Guided setup, not a config file</h3>
+              <p>
+                Instead of hunting down JSON files and editing them by hand,
+                figmma walks you through a browser-based setup wizard.
+                Paste your Figma token, pick your team, and you're done.
+              </p>
+            </div>
           </div>
-          <div class="config-card">
-            <h3>Codex CLI</h3>
-            <pre><code>{JSON.stringify({ mcpServers: { figmma: { command: "npx", args: ["-y", "figmma"] } } }, null, 2)}</code></pre>
+
+          <!-- Screenshot 3: Chat view -->
+          <div class="showcase-item">
+            <div class="showcase-img">
+              <img
+                src={`${base}/screenshots/dashboard-chat.png`}
+                alt="figmma dashboard chat view showing the conversation between agent and MCP server"
+                loading="lazy"
+              />
+            </div>
+            <div class="showcase-text">
+              <h3>Read the agent conversation</h3>
+              <p>
+                Switch to chat view and see the back-and-forth between your
+                agent and the MCP server as a readable conversation.
+                Great for understanding how tool calls actually work.
+              </p>
+            </div>
           </div>
         </div>
+
+        <div class="dashboard-why">
+          <h3>Why does this matter?</h3>
+          <p>
+            Most MCP servers are a black box. You install them, your agent uses
+            them, and if something breaks you have no idea why. The dashboard
+            gives you <strong>direct visibility</strong> into every request and
+            response — which makes figmma a great
+            <strong>learning tool</strong> for understanding how MCP works,
+            not just a way to connect to Figma.
+          </p>
+        </div>
+      </section>
+
+      <!-- ── Setup ─────────────────────────────────────── -->
+      <section class="config-section" id="configure">
+        <h2>
+          Setup in <span class="text-gradient">2 minutes</span>
+        </h2>
+
+        <div class="steps">
+          <!-- Step 1 -->
+          <div class="step">
+            <div class="step-number">1</div>
+            <div class="step-body">
+              <h3>Create a Personal Access Token</h3>
+              <p>
+                Open
+                <a href="https://www.figma.com/" target="_blank" rel="noopener">Figma</a>
+                &rarr; click your avatar (top-left) &rarr;
+                <strong>Settings</strong> &rarr;
+                <strong>Security</strong> tab &rarr;
+                scroll to <strong>Personal access tokens</strong> &rarr;
+                click <strong>Generate new token</strong>.
+              </p>
+              <p>
+                When setting
+                <a href="https://www.figma.com/developers/api#access-tokens" target="_blank" rel="noopener">scopes</a>,
+                select <strong>read-only</strong> for each scope figmma needs:
+              </p>
+              <ul class="scope-list">
+                <li><strong>File content</strong> — Read only</li>
+                <li><strong>File metadata</strong> — Read only</li>
+                <li><strong>Comments</strong> — Read only</li>
+                <li><strong>Team and project</strong> — Read only</li>
+              </ul>
+              <p class="step-hint">
+                Tokens expire based on the duration you choose (default: 90 days).
+                You'll need to generate a new one when it expires.
+                See the
+                <a href="https://help.figma.com/hc/en-us/articles/8085703771159-Manage-personal-access-tokens" target="_blank" rel="noopener">Figma token docs</a>
+                for full details.
+              </p>
+            </div>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="step">
+            <div class="step-number">2</div>
+            <div class="step-body">
+              <h3>Find your team ID</h3>
+              <p>
+                Open the
+                <a href="https://www.figma.com/files/" target="_blank" rel="noopener">Figma file browser</a>
+                and click on a <strong>team name</strong> in the left sidebar.
+                The URL will look like:
+              </p>
+              <pre><code>figma.com/files/<strong>orgId</strong>/team/<strong>teamId</strong>/...</code></pre>
+              <p class="step-hint">
+                The team ID is the number after <code>/team/</code>.
+                You can paste the full URL into the setup wizard and it will
+                extract the IDs automatically.
+                Make sure you're on a <em>team</em> page — a file URL
+                (<code>/design/...</code>) won't have a team ID in it.
+              </p>
+            </div>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-body">
+              <h3>Install figmma</h3>
+              <p><strong>macOS / Linux:</strong></p>
+              <pre><code>curl -fsSL https://raw.githubusercontent.com/stuffbucket/figmma/main/install.sh | bash</code></pre>
+              <p><strong>Windows (PowerShell):</strong></p>
+              <pre><code>irm https://raw.githubusercontent.com/stuffbucket/figmma/main/install.ps1 | iex</code></pre>
+              <p class="step-hint">
+                The script checks for Node.js (installs it if missing), then runs
+                <code>npm install -g @stuffbucket/figmma</code>. Postinstall
+                auto-registers with Claude Code, VS Code, and Codex CLI.
+              </p>
+            </div>
+          </div>
+
+          <!-- Step 4 -->
+          <div class="step">
+            <div class="step-number">4</div>
+            <div class="step-body">
+              <h3>Enter your token and team</h3>
+              <p>
+                The first time your agent calls a Figma tool, figmma opens a
+                setup wizard in your browser at
+                <code>localhost:5183</code>. Paste your token and team URL there.
+                The wizard validates your token against the Figma API before saving.
+              </p>
+              <p class="step-hint">
+                Your token and team ID are saved locally at
+                <code>~/.config/figmma/config.json</code> — they never
+                leave your machine.
+              </p>
+            </div>
+          </div>
+
+          <!-- Step 5 -->
+          <div class="step">
+            <div class="step-number">&#10003;</div>
+            <div class="step-body">
+              <h3>Done — start asking</h3>
+              <p>
+                Your agent can now list projects, search files, read metadata,
+                and pull comments from Figma. Try asking it:
+              </p>
+              <pre class="prompt"><code>"List all the projects in my Figma team"</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Manual config -->
+        <details class="manual-config">
+          <summary>
+            Already know what you're doing? Here's the raw MCP config.
+          </summary>
+          <div class="config-grid">
+            <div class="config-card">
+              <h3>Claude Code <span class="config-file">.mcp.json</span></h3>
+              <pre><code>{JSON.stringify({ mcpServers: { figmma: { command: "npx", args: ["-y", "@stuffbucket/figmma"] } } }, null, 2)}</code></pre>
+            </div>
+            <div class="config-card">
+              <h3>VS Code / Copilot <span class="config-file">.vscode/mcp.json</span></h3>
+              <pre><code>{JSON.stringify({ servers: { figmma: { type: "stdio", command: "npx", args: ["-y", "@stuffbucket/figmma"] } } }, null, 2)}</code></pre>
+            </div>
+            <div class="config-card">
+              <h3>Codex CLI <span class="config-file">.codex/mcp.json</span></h3>
+              <pre><code>{JSON.stringify({ mcpServers: { figmma: { command: "npx", args: ["-y", "@stuffbucket/figmma"] } } }, null, 2)}</code></pre>
+            </div>
+          </div>
+        </details>
       </section>
 
       <!-- ── Closing CTA ──────────────────────────────────── -->
       <section class="closing">
         <h2>Get started in one command</h2>
+        <pre class="closing-install"><code>curl -fsSL https://raw.githubusercontent.com/stuffbucket/figmma/main/install.sh | bash</code></pre>
         <p>
-          Install figmma, enter your Figma API token in the setup wizard, and
-          your agent has everything it needs to work with your design files.
+          The script handles prereqs, installs figmma, and registers it with
+          your agent. Enter your Figma API token in the setup wizard and you're done.
         </p>
         <div class="hero-actions">
           <a
@@ -327,7 +527,47 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, "");
       <a href="https://github.com/stuffbucket/figmma">figmma</a> · MIT License
     </footer>
 
+    <div class="lightbox-overlay" id="lightbox">
+      <img id="lightbox-img" src="" alt="" />
+    </div>
+
     <script is:inline>
+      // ── Lightbox ──────────────────────────────────
+      (function () {
+        const overlay = document.getElementById("lightbox");
+        const lbImg = document.getElementById("lightbox-img");
+
+        document.querySelectorAll(".showcase-img img").forEach(function (img) {
+          img.addEventListener("click", function () {
+            lbImg.src = img.src;
+            lbImg.alt = img.alt;
+
+            // Clamp to native resolution so we don't upscale
+            var nat = new Image();
+            nat.src = img.src;
+            nat.onload = function () {
+              lbImg.style.maxWidth = Math.min(nat.naturalWidth, window.innerWidth - 64) + "px";
+              lbImg.style.maxHeight = Math.min(nat.naturalHeight, window.innerHeight - 64) + "px";
+            };
+            // If already cached, naturalWidth is available immediately
+            if (nat.naturalWidth) {
+              lbImg.style.maxWidth = Math.min(nat.naturalWidth, window.innerWidth - 64) + "px";
+              lbImg.style.maxHeight = Math.min(nat.naturalHeight, window.innerHeight - 64) + "px";
+            }
+
+            overlay.classList.add("active");
+          });
+        });
+
+        overlay.addEventListener("click", function () {
+          overlay.classList.remove("active");
+        });
+
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape") overlay.classList.remove("active");
+        });
+      })();
+
       function copyInstall() {
         const text = document.getElementById("install-text").textContent;
         navigator.clipboard.writeText(text);
@@ -341,3 +581,4 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, "");
     </script>
   </body>
 </html>
+

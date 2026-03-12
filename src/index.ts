@@ -93,7 +93,7 @@ server.tool(
     ]
       .filter(Boolean)
       .join("\n");
-    logger.log("tool", "get_current_user", `Authenticated as ${user.handle}`, user);
+    logger.log("response", "get_current_user", `Authenticated as ${user.handle}`, user);
     return text(msg);
   }),
 );
@@ -125,7 +125,7 @@ server.tool(
       parsed.nodeId ? `Node ID: ${parsed.nodeId}` : null,
     ].filter(Boolean);
 
-    logger.log("tool", "parse_figma_url", `Extracted file key ${parsed.fileKey}`, parsed);
+    logger.log("response", "parse_figma_url", `Extracted file key ${parsed.fileKey}`, parsed);
     return text(lines.join("\n"));
   }),
 );
@@ -151,7 +151,7 @@ server.tool(
     }
     const formatted = projects.map((p) => `• ${p.name} (ID: ${p.id})`).join("\n");
     const summary = `${projects.length} project(s) in team ${team_id}:\n\n${formatted}`;
-    logger.log("tool", "list_team_projects", `Found ${projects.length} project(s)`, projects);
+    logger.log("response", "list_team_projects", `Found ${projects.length} project(s)`, projects);
     return text(summary);
   }),
 );
@@ -181,7 +181,7 @@ server.tool(
       .map((f) => `• ${f.name}\n  Key: ${f.key}\n  Last modified: ${f.last_modified}`)
       .join("\n\n");
     const summary = `${files.length} file(s) in project ${project_id}:\n\n${formatted}`;
-    logger.log("tool", "list_project_files", `Found ${files.length} file(s)`, files);
+    logger.log("response", "list_project_files", `Found ${files.length} file(s)`, files);
     return text(summary);
   }),
 );
@@ -214,7 +214,7 @@ server.tool(
       meta.editorType ? `Editor: ${meta.editorType}` : null,
       `File key: ${fileKey}`,
     ].filter(Boolean);
-    logger.log("tool", "get_file_info", `File: ${meta.name}`, meta);
+    logger.log("response", "get_file_info", `File: ${meta.name}`, meta);
     return text(lines.join("\n"));
   }),
 );
@@ -247,7 +247,7 @@ server.tool(
 
     if (results.length === 0) {
       const msg = `No files found matching "${query}" in team ${team_id}.`;
-      logger.log("tool", "search_projects", msg);
+      logger.log("response", "search_projects", msg);
       return text(msg);
     }
 
@@ -263,7 +263,7 @@ server.tool(
       .join("\n\n");
 
     const summary = `Found ${results.length} file(s) matching "${query}":\n\n${formatted}`;
-    logger.log("tool", "search_projects", `Found ${results.length} matching file(s)`, results);
+    logger.log("response", "search_projects", `Found ${results.length} matching file(s)`, results);
     return text(summary);
   }),
 );
@@ -294,7 +294,7 @@ server.tool(
 
     if (comments.length === 0) {
       const msg = `No comments found on file ${file_key}.`;
-      logger.log("tool", "get_file_comments", msg);
+      logger.log("response", "get_file_comments", msg);
       return text(msg);
     }
 
@@ -328,7 +328,7 @@ server.tool(
 
     const summary = `${comments.length} comment(s) on file ${file_key} (${topLevel.length} threads):\n\n${formatted}`;
     logger.log(
-      "tool",
+      "response",
       "get_file_comments",
       `${topLevel.length} thread(s), ${replies.length} repl(ies)`,
       {

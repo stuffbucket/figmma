@@ -2,6 +2,10 @@
   "name": "@stuffbucket/figmma",
   "version": "1.0.3",
   "description": "MCP server with real-time observability dashboard",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stuffbucket/figmma.git"
+  },
   "main": "dist/index.js",
   "bin": {
     "figmma": "dist/index.js"

@@ -1,0 +1,70 @@
+# figmma
+
+> MCP server for the Figma API with a real-time observability dashboard.
+
+## Overview
+
+figmma gives AI coding agents access to the Figma API via the Model Context Protocol (MCP). It includes a real-time observability dashboard so you can see every tool call and API request as it happens.
+
+- **npm package:** [@stuffbucket/figmma](https://www.npmjs.com/package/@stuffbucket/figmma)
+- **Source:** [github.com/stuffbucket/figmma](https://github.com/stuffbucket/figmma)
+- **Website:** [stuffbucket.github.io/figmma](https://stuffbucket.github.io/figmma)
+
+## Install
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/stuffbucket/figmma/main/install.sh | bash
+```
+
+Or via npm:
+
+```bash
+npm install -g @stuffbucket/figmma
+```
+
+The postinstall script auto-registers with Claude Code, VS Code / GitHub Copilot, and Codex CLI.
+
+## MCP Configuration
+
+Claude Code (`.mcp.json`):
+```json
+{ "mcpServers": { "figmma": { "command": "npx", "args": ["-y", "@stuffbucket/figmma"] } } }
+```
+
+VS Code / GitHub Copilot (`.vscode/mcp.json`):
+```json
+{ "servers": { "figmma": { "type": "stdio", "command": "npx", "args": ["-y", "@stuffbucket/figmma"] } } }
+```
+
+Codex CLI (`.codex/mcp.json`):
+```json
+{ "mcpServers": { "figmma": { "command": "npx", "args": ["-y", "@stuffbucket/figmma"] } } }
+```
+
+## Tools
+
+- `get_current_user` — Show the authenticated Figma user (cached)
+- `parse_figma_url` — Extract file key and node ID from a Figma URL
+- `list_team_projects` — List all projects in a team
+- `list_project_files` — List all files in a project
+- `get_file_info` — Get file metadata (name, version, last modified)
+- `search_projects` — Search for files by name across all team projects
+- `get_file_comments` — Retrieve all comments and threads on a file
+
+All tools are read-only and idempotent.
+
+## Authentication
+
+Set `FIGMA_API_TOKEN` and `FIGMA_TEAM_ID` as environment variables in your MCP client's env block, or run the browser-based setup wizard on first launch (http://localhost:5183).
+
+Config stored at `~/.config/figmma/config.json` (macOS/Linux) or `%APPDATA%\figmma\config.json` (Windows).
+
+## Key Files
+
+- [README.md](https://github.com/stuffbucket/figmma/blob/main/README.md) — Full documentation
+- [src/index.ts](https://github.com/stuffbucket/figmma/blob/main/src/index.ts) — MCP server entry point
+- [src/figma.ts](https://github.com/stuffbucket/figmma/blob/main/src/figma.ts) — Figma API client
+- [src/config.ts](https://github.com/stuffbucket/figmma/blob/main/src/config.ts) — Configuration management
+- [src/dashboard/server.ts](https://github.com/stuffbucket/figmma/blob/main/src/dashboard/server.ts) — Dashboard server
+- [dashboard/web/](https://github.com/stuffbucket/figmma/tree/main/dashboard/web) — Dashboard UI
+- [scripts/postinstall.mjs](https://github.com/stuffbucket/figmma/blob/main/scripts/postinstall.mjs) — Auto-registration script

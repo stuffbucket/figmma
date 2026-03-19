@@ -2,6 +2,8 @@
 
 MCP server for the Figma API with a real-time observability dashboard.
 
+**[Website](https://stuffbucket.github.io/figmma)** · **[npm](https://www.npmjs.com/package/@stuffbucket/figmma)** · **[GitHub](https://github.com/stuffbucket/figmma)**
+
 ## Install
 
 **macOS / Linux** (checks for Node.js, installs if missing, registers with all agents):
@@ -158,3 +160,9 @@ npm uninstall -g @stuffbucket/figmma
 ```
 
 This removes the MCP server entries from `.mcp.json`, `.vscode/mcp.json`, and `.codex/mcp.json`.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
+
+For a visual walkthrough with screenshots, visit the [figmma website](https://stuffbucket.github.io/figmma).

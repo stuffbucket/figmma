@@ -1,0 +1,9 @@
+{
+  "servers": {
+    "figmma": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@stuffbucket/figmma"]
+    }
+  }
+}

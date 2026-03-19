@@ -1,0 +1,5 @@
+# Astro build output
+.astro/
+dist/
+node_modules/
+.DS_Store

@@ -745,23 +745,26 @@ body {
   margin: 0;
 }
 
-.dashboard-why {
+.hero-why {
   background: color-mix(in srgb, var(--sl-color-accent) 6%, var(--sl-color-gray-6));
   border: 1px solid color-mix(in srgb, var(--sl-color-accent) 20%, transparent);
   border-radius: var(--radius-2xl);
   padding: 2rem 2.5rem;
-  max-width: 40rem;
+  max-width: 80ch;
   margin: 0 auto;
+  position: relative;
+  z-index: 1;
+  text-align: left;
 }
 
-.dashboard-why h3 {
+.hero-why h3 {
   font-size: var(--fs-lg);
   font-weight: var(--fw-heading);
   color: var(--sl-color-accent);
   margin: 0 0 0.5rem;
 }
 
-.dashboard-why p {
+.hero-why p {
   font-size: var(--fs-base);
   color: var(--sl-color-gray-2);
   line-height: var(--lh-relaxed);
@@ -1074,7 +1077,7 @@ main {
     grid-template-columns: 1fr;
     direction: ltr;
   }
-  .dashboard-why {
+  .hero-why {
     padding: 1.5rem;
   }
 }
